@@ -9,7 +9,7 @@
 -- PURPOSE: These queries back the MPHH Benchmarking and Reporting
 -- Dashboard (benchmarking_app.py). Each query corresponds to a
 -- specific chart or table in one of the six dashboard tabs:
---   Tab 1 -- Robinson Strategy Tracker
+--   Tab 1 -- Robertson Strategy Tracker
 --   Tab 2 -- YoY Growth
 --   Tab 3 -- Cohort Retention
 --   Tab 4 -- Agent Leaderboard
@@ -20,9 +20,15 @@
 --   agent_id            : assigned agent per household
 --   region              : Midwest / South / West / Northeast
 --   quarter             : snapshot quarter label (e.g. 2023Q1)
---   robinson_target_pct : Robinson Strategy target for that quarter
+--   robinson_target_pct : Robertson Strategy target for that quarter
 --
--- Robinson Strategy targets by quarter:
+-- Robertson Strategy: AutoShield's initiative to grow Multiproduct Household
+-- penetration by deepening engagement with the Robertsons -- long-tenured
+-- households holding multiple policies who pay reliably and demonstrate strong
+-- brand loyalty. Targets represent the quarterly MPHH conversion rate (%) the
+-- strategy sets as the portfolio growth goal.
+--
+-- Robertson Strategy targets by quarter:
 --   2023Q1=25.0  2023Q2=25.5  2023Q3=26.0  2023Q4=26.5
 --   2024Q1=27.0  2024Q2=27.5  2024Q3=28.0  2024Q4=28.5
 --   2025Q1=29.0  2025Q2=29.5  2025Q3=30.0  2025Q4=30.5
@@ -30,13 +36,13 @@
 
 
 -- ============================================================
--- Section 1: Robinson Strategy Tracker (Tab 1)
+-- Section 1: Robertson Strategy Tracker (Tab 1)
 -- ============================================================
 
--- Q1: Quarterly MPHH rate vs. Robinson Strategy target
--- Answers: Is the portfolio on track or behind the Robinson
+-- Q1: Quarterly MPHH rate vs. Robertson Strategy target
+-- Answers: Is the portfolio on track or behind the Robertson
 -- Strategy target each quarter? What is the gap?
--- Dashboard: "Quarterly MPHH Rate vs. Robinson Strategy Target"
+-- Dashboard: "Quarterly MPHH Rate vs. Robertson Strategy Target"
 -- and "Quarterly Status Summary" panel.
 SELECT
     quarter,
@@ -62,10 +68,10 @@ GROUP BY quarter
 ORDER BY quarter;
 
 
--- Q2: Gap vs. Robinson target summary
+-- Q2: Gap vs. Robertson target summary
 -- Answers: In how many quarters did the portfolio miss its target?
 -- What is the average shortfall across all quarters?
--- Dashboard: "Gap vs. Robinson Target by Quarter" bar chart.
+-- Dashboard: "Gap vs. Robertson Target by Quarter" bar chart.
 WITH quarterly_perf AS (
     SELECT
         quarter,

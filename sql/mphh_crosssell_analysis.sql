@@ -168,7 +168,7 @@ ORDER BY unrealized_cltv_M DESC;
 -- Q7: Financial impact by home ownership -- quantifies the property opportunity
 -- Answers: What is the projected CLTV of homeowner households that
 -- have not yet converted? This is the core property cross-sell population.
--- Business use: Homeowners are the primary target for Robinson Strategy
+-- Business use: Homeowners are the primary target for Robertson Strategy
 -- property attachment. Quantifies the premium-bearing population.
 SELECT
     home_ownership,

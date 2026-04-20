@@ -87,9 +87,18 @@ if len(missing_states) > 0:
 print(f"  Regions assigned: {sorted(df['region'].unique().tolist())}")
 
 # ============================================================
-# SECTION 4: Add Robinson Strategy quarterly targets
+# SECTION 4: Add Robertson Strategy quarterly targets
+# The Robertson Strategy targets a specific high-value customer demographic
+# known internally as the Robertsons. These are long-tenured households who
+# have been with AutoShield Insurance for several years, hold multiple product
+# policies across vehicles, motorcycle, boat, and home, are more likely to be
+# married, pay their premiums reliably either in a single annual payment or
+# through auto-pay, and demonstrate strong brand loyalty over time. The strategy
+# is focused on deepening engagement with this demographic by expanding their
+# product portfolio and ensuring they remain within the AutoShield household.
+#
 # Targets represent the MPHH conversion rate (%) that the
-# Robinson Strategy sets as the growth goal for each quarter.
+# Robertson Strategy sets as the growth goal for each quarter.
 # ============================================================
 df["snapshot_date"] = pd.to_datetime(df["snapshot_date"])
 df["quarter"]       = df["snapshot_date"].dt.to_period("Q").astype(str)
@@ -115,7 +124,7 @@ unmapped = df[df["robinson_target_pct"].isna()]["quarter"].unique()
 if len(unmapped) > 0:
     print(f"  WARNING: {len(unmapped)} quarters not in target map: {unmapped}")
 
-print(f"  Robinson targets mapped for {df['robinson_target_pct'].notna().sum():,} rows")
+print(f"  Robertson targets mapped for {df['robinson_target_pct'].notna().sum():,} rows")
 
 # ============================================================
 # SECTION 5: Validate output schema

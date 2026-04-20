@@ -2,11 +2,11 @@
 01_generate_data.py
 -------------------
 Generates a synthetic 150,000-row Multiproduct Household (MPHH) dataset
-for Progressive Insurance Agency Operations Analytics portfolio project.
+for AutoShield Insurance Agency Operations Analytics portfolio project.
 
 Each row represents one insured household at a point-in-time snapshot.
 The target variable is `converted_mphh` (0/1) -- whether the household
-added a second Progressive product within 12 months of the snapshot date.
+added a second AutoShield product within 12 months of the snapshot date.
 
 Author : Luciano Casillas
 Version: 1.0

@@ -3,14 +3,23 @@ MPHH Benchmarking and Reporting Dashboard
 Author: Luciano Casillas
 Version: 1.0
 ---
-Agency Operations MPHH performance tracker supporting the Robinson Strategy
+Agency Operations MPHH performance tracker supporting the Robertson Strategy
 reporting cadence. Tracks quarterly MPHH conversion rate vs. target, YoY growth,
 cohort retention views, agent leaderboards, and state-level performance.
+
+The Robertson Strategy targets a specific high-value customer demographic known
+internally as the Robertsons. These are long-tenured households who have been with
+AutoShield Insurance for several years, hold multiple product policies across
+vehicles, motorcycle, boat, and home, are more likely to be married, pay their
+premiums reliably either in a single annual payment or through auto-pay, and
+demonstrate strong brand loyalty over time. The strategy is focused on deepening
+engagement with this demographic by expanding their product portfolio and ensuring
+they remain within the AutoShield household.
 
 Tab index:
     render_kpi_header           -- persistent KPI row above all tabs
     render_sidebar              -- all filters
-    render_robinson_tracker     -- Tab 1: Robinson Strategy Tracker
+    render_robinson_tracker     -- Tab 1: Robertson Strategy Tracker
     render_yoy_growth           -- Tab 2: YoY Growth
     render_cohort_retention     -- Tab 3: Cohort Retention
     render_agent_leaderboard    -- Tab 4: Agent Leaderboard
@@ -512,7 +521,7 @@ def render_kpi_header(df, fdf):
         {
             "label":  "Current Quarter MPHH Rate",
             "value":  f"{cur_rate:.2f}%",
-            "delta":  f"{vs_tgt:+.2f}% vs. Robinson target",
+            "delta":  f"{vs_tgt:+.2f}% vs. Robertson target",
             "color":  GREEN_700 if vs_tgt >= 0 else RED_SOFT,
         },
         {
@@ -567,9 +576,9 @@ def render_robinson_tracker(fdf):
     gap_str     = f"{gap:+.2f}%"
 
     insight(
-        "Robinson Strategy Status",
+        "Robertson Strategy Status",
         f"The most recent quarter ({latest_q['quarter']}) shows an MPHH rate of "
-        f"{latest_q['rate_pct']:.2f}% against a Robinson Strategy target of "
+        f"{latest_q['rate_pct']:.2f}% against a Robertson Strategy target of "
         f"{latest_q['target_pct']:.1f}% ({gap_str}). "
         f"The portfolio has been behind target in {len(behind_qtrs)} of "
         f"{len(qs.dropna(subset=['rate_pct']))} quarters tracked. "
@@ -580,7 +589,7 @@ def render_robinson_tracker(fdf):
     col1, col2 = st.columns([3, 2])
 
     with col1:
-        section_header("Quarterly MPHH Rate vs. Robinson Strategy Target")
+        section_header("Quarterly MPHH Rate vs. Robertson Strategy Target")
         fig = go.Figure()
 
         # Target area fill
@@ -588,7 +597,7 @@ def render_robinson_tracker(fdf):
             x=qs["quarter"], y=qs["target_pct"],
             mode="lines",
             line=dict(color=ORANGE_700, width=2, dash="dash"),
-            name="Robinson Target",
+            name="Robertson Target",
             hovertemplate="Target: %{y:.1f}%<extra></extra>",
         ))
 
@@ -655,7 +664,7 @@ def render_robinson_tracker(fdf):
     st.markdown("<br>", unsafe_allow_html=True)
     section_header(
         "Gap Analysis and Conversion Volume",
-        subtitle="Gap = actual MPHH rate minus Robinson target. Green bars are on-track quarters; red bars show the shortfall."
+        subtitle="Gap = actual MPHH rate minus Robertson target. Green bars are on-track quarters; red bars show the shortfall."
     )
 
     col3, col4 = st.columns(2)
@@ -1702,7 +1711,7 @@ def main():
         f"<h2 style='color:{NAVY};margin-bottom:2px;font-size:22px;'>"
         f"MPHH Benchmarking and Reporting Dashboard</h2>"
         f"<p style='font-size:14px;color:{BLACK};margin-bottom:12px;'>"
-        f"Agency Operations Analytics | Robinson Strategy Reporting Cadence | "
+        f"Agency Operations Analytics | Robertson Strategy Reporting Cadence | "
         f"<span style='color:{STEEL_700};'>Author: Luciano Casillas</span></p>",
         unsafe_allow_html=True,
     )
@@ -1710,7 +1719,7 @@ def main():
     render_kpi_header(df, fdf)
 
     tabs = st.tabs([
-        "Robinson Strategy Tracker",
+        "Robertson Strategy Tracker",
         "YoY Growth",
         "Cohort Retention",
         "Agent Leaderboard",

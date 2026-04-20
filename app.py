@@ -4,7 +4,7 @@ Author: Luciano Casillas
 Version: 1.0
 ---
 This dashboard analyzes Multiproduct Household (MPHH) cross-sell propensity
-for Progressive Insurance Agency Operations. It surfaces which single-product
+for AutoShield Insurance Agency Operations. It surfaces which single-product
 households are most likely to add a second product, quantifies the revenue
 opportunity, and provides actionable intervention candidate lists for agency
 sales teams and strategic partners.
@@ -755,7 +755,7 @@ def render_crosssell_drivers(fdf):
         "These charts show how each household attribute relates to MPHH conversion rate. "
         "Conversion rate = share of households in each group that added a second product "
         "within 12 months. Higher bars = more likely to convert. "
-        "MPHH: Multiproduct Household -- a customer holding two or more Progressive products."
+        "MPHH: Multiproduct Household -- a customer holding two or more AutoShield products."
     )
     with st.expander("About these charts"):
         st.markdown(f"<p style='font-size:14px;color:{BLACK};'>{info_text}</p>", unsafe_allow_html=True)
@@ -1210,7 +1210,7 @@ def render_model_risk(df, fdf):
         st.markdown(
             f'<div class="risk-metric-tile"><div class="rtitle">Median Tenure</div>'
             f'<div class="rvalue">{med_tenure} mo</div>'
-            f'<div class="rsub">median months with Progressive</div></div>',
+            f'<div class="rsub">median months with AutoShield</div></div>',
             unsafe_allow_html=True,
         )
 
@@ -1449,7 +1449,7 @@ def render_healthcare_apply():
                 "Segment by Platform Channel",
                 "Self-service digital enrollees convert on product clarity and price; "
                 "broker-assisted enrollees convert on relationship and needs fit. "
-                "The same channel segmentation logic that drives Progressive's agency "
+                "The same channel segmentation logic that drives AutoShield's agency "
                 "strategy applies directly to benefits platform design.",
                 "Independent Agent channel: highest MPHH rate"
             ),
@@ -1481,7 +1481,7 @@ def render_healthcare_apply():
     section_header("Closing Takeaway")
     st.markdown(
         f'<div class="summary-tile" style="min-height:auto;">'
-        f'<p>The skills that make a strong MPHH analyst at Progressive -- building propensity '
+        f'<p>The skills that make a strong MPHH analyst at AutoShield -- building propensity '
         f'models, quantifying CLTV opportunity, designing outreach simulations, and communicating '
         f'findings to sales and product leadership -- transfer directly to any industry where '
         f'cross-sell and retention analytics drive revenue strategy. The framework, not just '
@@ -1496,9 +1496,14 @@ def render_healthcare_apply():
 # ============================================================
 def render_recommendations():
     section_subtitle(
-        "Based on analysis of 150,000 synthetic Progressive Agency households, the following "
+        "Based on analysis of 150,000 synthetic AutoShield Agency households, the following "
         "recommendations are prioritized by expected impact, implementation complexity, and "
-        "alignment with the Robinson Strategy's Multiproduct Household growth objectives."
+        "alignment with the Robertson Strategy's Multiproduct Household growth objectives. "
+        "The Robertson Strategy targets a specific high-value customer demographic known "
+        "internally as the Robertsons -- long-tenured households who hold multiple product "
+        "policies, pay reliably through annual payment or auto-pay, and demonstrate strong "
+        "brand loyalty. The strategy deepens engagement by expanding their product portfolio "
+        "and keeping them within the AutoShield household."
     )
 
     recs = {
@@ -1556,7 +1561,7 @@ def render_recommendations():
                 "title":    "Build Real-Time Propensity Scoring Pipeline",
                 "value":    "Scalable growth platform",
                 "effort":   "High effort",
-                "body":     "The GBM model trained here should be retrained on real Progressive "
+                "body":     "The GBM model trained here should be retrained on real AutoShield "
                             "data and deployed as a scored Snowflake view refreshed nightly. "
                             "Scores should flow into agent dashboards (Salesforce or equivalent) "
                             "so agents see conversion likelihood at the point of renewal contact -- "
@@ -1572,7 +1577,7 @@ def render_recommendations():
                 "body":     "Productionize this Streamlit dashboard (or port to Tableau/Power BI) "
                             "as the Agency Operations MPHH performance tracker. Add quarterly "
                             "cohort retention views, agent-level leaderboards, and YoY MPHH "
-                            "growth tracking to support the Robinson Strategy reporting cadence.",
+                            "growth tracking to support the Robertson Strategy reporting cadence.",
                 "evidence": "Current reporting gap: no unified view of MPHH conversion rate, "
                             "CLTV opportunity, and campaign ROI in one dashboard. "
                             "This closes that gap for sales leadership and BI partners.",
@@ -1618,7 +1623,7 @@ def main():
         f"<h2 style='color:{NAVY};margin-bottom:4px;font-size:22px;'>"
         f"MPHH Cross-Sell Propensity Dashboard</h2>"
         f"<p style='font-size:14px;color:{BLACK};margin-bottom:12px;'>"
-        f"Agency Operations Analytics | Progressive Insurance | "
+        f"Agency Operations Analytics | AutoShield Insurance | "
         f"<span style='color:{STEEL_700};'>Author: Luciano Casillas</span></p>",
         unsafe_allow_html=True,
     )

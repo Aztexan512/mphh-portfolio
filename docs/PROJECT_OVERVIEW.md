@@ -2,15 +2,17 @@
 
 ## Project Summary
 
-This project analyzes which single-product Progressive Insurance households are most likely to add a second product (becoming a Multiproduct Household, or MPHH) within 12 months. Using 150,000 synthetic agency households, the analysis identifies that property quote abandonment and proactive outreach contact frequency are the two strongest behavioral signals for cross-sell conversion. A Gradient Boosting model achieves AUC 0.69 on holdout data, with the top two propensity deciles capturing 36% of all conversions -- enabling highly targeted, low-waste outreach campaigns. The projected unconverted CLTV opportunity across the full dataset exceeds $280M.
+This project analyzes which single-product AutoShield Insurance households are most likely to add a second product (becoming a Multiproduct Household, or MPHH) within 12 months. Using 150,000 synthetic agency households, the analysis identifies that property quote abandonment and proactive outreach contact frequency are the two strongest behavioral signals for cross-sell conversion. A Gradient Boosting model achieves AUC 0.69 on holdout data, with the top two propensity deciles capturing 36% of all conversions -- enabling highly targeted, low-waste outreach campaigns. The projected unconverted CLTV opportunity across the full dataset exceeds $280M.
 
 ---
 
 ## Business Problem
 
-**Question:** Which of Progressive's single-product households should receive cross-sell outreach, and in what priority order, to maximize Multiproduct Household growth and CLTV?
+**Question:** Which of AutoShield's single-product households should receive cross-sell outreach, and in what priority order, to maximize Multiproduct Household growth and CLTV?
 
-**Stakeholders:** Agency Operations leadership, Sales Strategy team, BI/Control partners, Product teams driving the Robinson Strategy.
+**Stakeholders:** Agency Operations leadership, Sales Strategy team, BI/Control partners, Product teams driving the Robertson Strategy.
+
+The Robertson Strategy targets a specific high-value customer demographic known internally as the Robertsons. These are long-tenured households who have been with AutoShield Insurance for several years, hold multiple product policies across vehicles, motorcycle, boat, and home, are more likely to be married, pay their premiums reliably either in a single annual payment or through auto-pay, and demonstrate strong brand loyalty over time. The strategy is focused on deepening engagement with this demographic by expanding their product portfolio and ensuring they remain within the AutoShield household.
 
 **Why it matters:** Multiproduct Households retain at significantly higher rates and generate 40-60% more lifetime premium than single-product customers. Each household that adds a property product represents not just incremental premium but a structural improvement in retention -- making MPHH growth a top strategic priority.
 
@@ -57,7 +59,7 @@ Six-tab Streamlit dashboard organized from overview to actionable recommendation
 
 4. **Elite and Plus tier homeowners are the highest-value cross-sell segment.** Independent Agent / Elite / Auto households convert at over 38% with an average projected CLTV above $1,800 -- 1.5x the portfolio average.
 
-5. **The 24-60 month tenure cohort is the volume-and-conversion sweet spot.** Established customers who have been with Progressive 2-5 years have the trust and engagement profile most receptive to cross-sell, and they represent a large share of the unconverted opportunity.
+5. **The 24-60 month tenure cohort is the volume-and-conversion sweet spot.** Established customers who have been with AutoShield 2-5 years have the trust and engagement profile most receptive to cross-sell, and they represent a large share of the unconverted opportunity.
 
 6. **Top 20% of model-scored households capture 36% of all conversions. A campaign targeting only the top two propensity deciles achieves 2.05x the conversion rate of untargeted outreach, at a fraction of the contact cost.
 

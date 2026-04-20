@@ -1,5 +1,5 @@
 # Interview Preparation Guide
-## Project: MPHH Cross-Sell Propensity | Role: Data Analyst III, Agency Operations Analytics (Progressive Insurance)
+## Project: MPHH Cross-Sell Propensity | Role: Data Analyst III, Agency Operations Analytics (AutoShield Insurance)
 
 ---
 
@@ -86,7 +86,7 @@ The tab structure follows a deliberate narrative arc: Overview (what is happenin
 For an executive: lead with the KPI header and financial impact tab. Simplify to three numbers: total opportunity, expected ROI at 15% save rate, top recommended action. Remove the model tab entirely -- they care about decisions, not AUC. For an operations manager: lead with the At-Risk Explorer and the intervention candidate query. Show them the specific households to contact and which outreach sequence to use. The model tab matters here because they need to understand why a household is scored high before calling an agent.
 
 **What filters did you include and why those specifically?**
-Agency channel (the primary strategic lever in the Robinson Strategy), anchor product (drives segment-specific outreach scripts), policy tier (determines priority and CLTV magnitude), tenure range (isolates cohort timing effects), and home ownership (gates the property cross-sell conversation). These five filters cover every meaningful segmentation dimension in the dataset without overwhelming the user with irrelevant controls.
+Agency channel (the primary strategic lever in the Robertson Strategy), anchor product (drives segment-specific outreach scripts), policy tier (determines priority and CLTV magnitude), tenure range (isolates cohort timing effects), and home ownership (gates the property cross-sell conversation). These five filters cover every meaningful segmentation dimension in the dataset without overwhelming the user with irrelevant controls.
 
 ---
 
@@ -95,10 +95,10 @@ Agency channel (the primary strategic lever in the Robinson Strategy), anchor pr
 **How does the insurance cross-sell framework apply to healthcare?**
 The core logic is identical: a customer holds one product (medical insurance / anchor policy), a second product exists to be added (supplemental coverage / property insurance), behavioral signals predict readiness (benefits portal activity / property quote), and outreach timing and frequency drive conversion. The translation table in Tab 5 maps each insurance feature to its healthcare analogue column-for-column.
 
-**What would change if you retrained on real Progressive data?**
+**What would change if you retrained on real AutoShield data?**
 The feature coefficients would change -- real data captures interactions that synthetic data approximates. The conversion rate baseline would likely be lower (synthetic is optimistically calibrated). We would add features not available here: payment history, renewal quote acceptance rate, agent relationship tenure, and cross-sell quote-to-bind ratio. The model architecture and evaluation approach would stay the same.
 
-**What data would you need from Progressive to make this operational?**
+**What data would you need from AutoShield to make this operational?**
 A Snowflake view with: one row per household per quarter, existing policy details (product, tier, premium), CRM outreach contact logs (call attempts, emails, agent notes), digital event logs (quote starts, app logins, portal visits), claims history, and a 12-month conversion flag built from the policy transaction table. With those inputs, the model pipeline in this project would run unchanged.
 
 ---
@@ -184,7 +184,7 @@ Signals: you read the JD carefully and want to understand your actual scope of w
 4. **"What does a 'great' piece of analysis look like on this team -- is it measured by the complexity of the model, the quality of the stakeholder presentation, or something else?"**
 Signals: you are thinking about how your work will be evaluated and what good looks like in this specific culture.
 
-5. **"The Robinson Strategy is mentioned as a key strategic priority. How does Agency Operations Analytics contribute to the metrics that the Robinson Strategy is measured on, and are those metrics visible to the analytics team?"**
+5. **"The Robertson Strategy is mentioned as a key strategic priority. How does Agency Operations Analytics contribute to the metrics that the Robertson Strategy is measured on, and are those metrics visible to the analytics team?"**
 Signals: you want to connect your day-to-day work to the company's strategic objectives -- the mark of a senior analyst who thinks beyond task execution.
 
 ---
@@ -205,9 +205,9 @@ Signals: you want to connect your day-to-day work to the company's strategic obj
 
 ## Glossary for This Project
 
-**MPHH (Multiproduct Household):** A customer household that holds two or more Progressive insurance products. Example: auto + property, or auto + motorcycle. MPHH customers retain at higher rates and generate more lifetime premium.
+**MPHH (Multiproduct Household):** A customer household that holds two or more AutoShield insurance products. Example: auto + property, or auto + motorcycle. MPHH customers retain at higher rates and generate more lifetime premium.
 
-**Robinson Strategy:** Progressive's named strategic initiative to grow Multiproduct Household penetration by cross-selling property insurance to existing auto customers, often through the agency channel.
+**Robertson Strategy:** AutoShield's named strategic initiative to grow Multiproduct Household penetration by cross-selling property insurance to existing auto customers, often through the agency channel. The strategy targets a specific high-value demographic known internally as the Robertsons -- long-tenured households who have been with AutoShield Insurance for several years, hold multiple product policies across vehicles, motorcycle, boat, and home, are more likely to be married, pay their premiums reliably either in a single annual payment or through auto-pay, and demonstrate strong brand loyalty over time. The strategy is focused on deepening engagement with this demographic by expanding their product portfolio and ensuring they remain within the AutoShield household.
 
 **Propensity Score:** A model-derived probability (0-100) representing how likely a household is to convert to MPHH within 12 months. A score of 72 means the model estimates a 72% conversion probability.
 
