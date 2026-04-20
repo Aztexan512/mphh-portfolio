@@ -13,8 +13,8 @@
 
 | Dashboard | Description |
 |---|---|
-| [MPHH Cross-Sell Propensity](https://your-username.streamlit.app/mphh-propensity) | Campaign targeting: which households to outreach, why, and what it's worth |
-| [MPHH Benchmarking & Reporting](https://your-username.streamlit.app/mphh-benchmarking) | Executive reporting: Robinson Strategy tracker, agent leaderboard, YoY growth |
+| [MPHH Cross-Sell Propensity](https://qf7zyjwemc2duqnbkhbhgh.streamlit.app/) | Campaign targeting: which households to outreach, why, and what it's worth |
+| [MPHH Benchmarking & Reporting](https://benchmarkingapppy-vjccagmtcwt2fdtbrzrjtx.streamlit.app/) | Executive reporting: Robinson Strategy tracker, agent leaderboard, YoY growth |
 
 > Replace placeholder URLs with your deployed Streamlit Community Cloud links.
 
