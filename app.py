@@ -10,14 +10,14 @@ opportunity, and provides actionable intervention candidate lists for agency
 sales teams and strategic partners.
 
 Tab index:
-    render_kpi_header       -- persistent KPI row above all tabs
-    render_sidebar          -- all filters
-    render_overview         -- Tab 1: Overview
-    render_crosssell_drivers-- Tab 2: Cross-Sell Drivers
-    render_model_risk       -- Tab 3: Model + Risk
-    render_financial_impact -- Tab 4: Financial Impact
-    render_healthcare_apply -- Tab 5: Healthcare Application
-    render_recommendations  -- Tab 6: Recommendations
+    render_kpi_header       : persistent KPI row above all tabs
+    render_sidebar          : all filters
+    render_overview         : Tab 1: Overview
+    render_crosssell_drivers: Tab 2: Cross-Sell Drivers
+    render_model_risk       : Tab 3: Model + Risk
+    render_financial_impact : Tab 4: Financial Impact
+    render_recommendations  : Tab 5: Recommendations
+    render_healthcare_apply : Tab 6: Healthcare Application
 """
 
 # ============================================================
@@ -59,6 +59,7 @@ GRAY_300   = "#CCCCCC"
 GREEN_700  = "#08CAA9"
 GREEN_900  = "#067462"
 ORANGE_700 = "#FF8A39"
+RED_SOFT   = "#E05252"
 
 CHART_FONT = dict(family="Inter, Helvetica Neue, sans-serif", size=13, color=BLACK)
 BAR_COLORS = [BLUE_700, GREEN_700, ORANGE_700, STEEL_700, BLUE_500, NAVY, GREEN_900]
@@ -82,7 +83,7 @@ def inject_css():
         background: {WHITE};
         border-left: 4px solid {BLUE_700};
         border-radius: 6px;
-        padding: 12px 16px 10px 16px;
+        padding: 0 16px 10px 16px;
         margin-bottom: 8px;
         box-shadow: 0 1px 4px rgba(0,0,0,0.07);
     }}
@@ -95,7 +96,7 @@ def inject_css():
         margin-bottom: 14px;
     }}
     .insight-strip .label {{
-        font-size: 11px;
+        font-size: 17px;
         font-weight: 700;
         letter-spacing: 0.08em;
         color: {NAVY};
@@ -103,7 +104,7 @@ def inject_css():
         margin-bottom: 4px;
     }}
     .insight-strip .body {{
-        font-size: 14px;
+        font-size: 16px;
         color: {NAVY};
         line-height: 1.55;
     }}
@@ -383,16 +384,34 @@ def init_session_state(df):
 # HELPERS
 # ============================================================
 def insight(label, body):
+    sentences = [s.strip() for s in body.split(". ") if s.strip()]
+    if len(sentences) > 1:
+        formatted = []
+        for i, s in enumerate(sentences):
+            if i < len(sentences) - 1:
+                formatted.append(s + ".")
+            else:
+                formatted.append(s if s.endswith(".") else s + ".")
+        li_items = "".join(f"<li>{s}</li>" for s in formatted)
+        body_html = f'<ul style="margin:0;padding-left:20px;line-height:1.7;">{li_items}</ul>'
+    else:
+        body_html = body
     st.markdown(
         f'<div class="insight-strip"><div class="label">{label}</div>'
-        f'<div class="body">{body}</div></div>',
+        f'<div class="body">{body_html}</div></div>',
         unsafe_allow_html=True,
     )
 
 
-def section_header(title, subtitle=None):
+def section_header(title, subtitle=None, border_color=None, margin_top=None):
+    style = ""
+    if border_color:
+        style += f"border-left-color:{border_color};"
+    if margin_top is not None:
+        style += f"margin-top:{margin_top}px;"
+    style_attr = f' style="{style}"' if style else ""
     st.markdown(
-        f'<div class="section-header"><h4>{title}</h4></div>',
+        f'<div class="section-header"{style_attr}><h4>{title}</h4></div>',
         unsafe_allow_html=True,
     )
     if subtitle:
@@ -434,6 +453,8 @@ def bar_chart(x_vals, y_vals, title, x_label, y_label, y_max=None, colors=None, 
 
 
 def sparkline(spark_x, spark_y, color=BLUE_700):
+    min_val = min(spark_y) if spark_y else 0
+    max_val = max(spark_y) if spark_y else 1
     fig = go.Figure(
         go.Scatter(
             x=spark_x, y=spark_y,
@@ -449,7 +470,7 @@ def sparkline(spark_x, spark_y, color=BLUE_700):
         plot_bgcolor="rgba(0,0,0,0)",
         margin=dict(l=0, r=0, t=0, b=0),
         xaxis=dict(visible=False),
-        yaxis=dict(visible=False),
+        yaxis=dict(visible=False, range=[min_val * 0.85, max_val * 1.15]),
         showlegend=False,
     )
     return fig
@@ -649,6 +670,16 @@ def render_overview(fdf):
         f"highest rate, and households that started a property quote are 2.4x more likely to "
         f"convert than those with no quote activity."
     )
+    with st.expander("About these charts"):
+        st.markdown(
+            f"<p style='font-size:14px;color:{BLACK};'>"
+            "The donut chart shows the overall split between households that converted to MPHH "
+            "and those that remain single-product. "
+            "The bar chart compares conversion rate across agency channels. "
+            "Conversion rate = share of households in each group that added a second AutoShield product. "
+            "The summary tiles below highlight the top behavioral drivers, model summary, and "
+            "cross-industry portability of this framework."
+            "</p>", unsafe_allow_html=True)
 
     c1, c2 = st.columns(2)
 
@@ -728,7 +759,7 @@ def render_overview(fdf):
             f'The MPHH cross-sell framework maps directly to healthcare benefits bundling '
             f'and employer plan cross-enrollment. The same outreach contact signal that '
             f'drives insurance cross-sell predicts supplemental benefit adoption in '
-            f'employer-sponsored healthcare -- enabling the same intervention logic '
+            f'employer-sponsored healthcare, enabling the same intervention logic '
             f'across industries.'
             f'</p></div>',
             unsafe_allow_html=True,
@@ -743,7 +774,7 @@ def render_crosssell_drivers(fdf):
         "Key Finding",
         "Outreach contact frequency and property quote initiation are the two most actionable "
         "levers for MPHH conversion. Elite-tier homeowners reached by Independent Agents "
-        "convert at over 38% -- nearly 1.5x the overall rate. Households in the 24-60 month "
+        "convert at over 38%, nearly 1.5x the overall rate. Households in the 24-60 month "
         "tenure window represent the highest-volume, high-conversion opportunity."
     )
 
@@ -755,7 +786,7 @@ def render_crosssell_drivers(fdf):
         "These charts show how each household attribute relates to MPHH conversion rate. "
         "Conversion rate = share of households in each group that added a second product "
         "within 12 months. Higher bars = more likely to convert. "
-        "MPHH: Multiproduct Household -- a customer holding two or more AutoShield products."
+        "MPHH (Multiproduct Household): a customer holding two or more AutoShield products."
     )
     with st.expander("About these charts"):
         st.markdown(f"<p style='font-size:14px;color:{BLACK};'>{info_text}</p>", unsafe_allow_html=True)
@@ -934,7 +965,7 @@ def render_crosssell_drivers(fdf):
             title=dict(text="Channel: Conversion Rate vs. Avg CLTV", font=dict(size=13, color=NAVY), x=0.02),
             xaxis=dict(color=BLACK, tickfont=dict(size=10)),
             yaxis=dict(title="Conversion Rate (%)", color=BLUE_700),
-            yaxis2=dict(title="Avg CLTV ($)", color=ORANGE_700, overlaying="y", side="right"),
+            yaxis2=dict(title="Avg CLTV ($)", color=ORANGE_700, overlaying="y", side="right", range=[0, 2585]),
             legend=dict(orientation="h", x=0.5, xanchor="center", y=-0.22),
             barmode="group",
         ))
@@ -974,7 +1005,7 @@ def render_crosssell_drivers(fdf):
             title=dict(text="Revenue-Weighted Conversion by Tenure Cohort", font=dict(size=13, color=NAVY), x=0.02),
             xaxis=dict(color=BLACK, tickfont=dict(size=10)),
             yaxis=dict(title="Total CLTV ($M)", color=GREEN_700),
-            yaxis2=dict(title="Conversion Rate (%)", color=ORANGE_700, overlaying="y", side="right"),
+            yaxis2=dict(title="Conversion Rate (%)", color=ORANGE_700, overlaying="y", side="right", range=[0, 30]),
             legend=dict(orientation="h", x=0.5, xanchor="center", y=-0.22),
         ))
         fig7.update_layout(layout7)
@@ -990,10 +1021,21 @@ def render_model_risk(df, fdf):
     insight(
         "Key Finding",
         f"The Gradient Boosting model achieves AUC {auc:.3f} on holdout data. The top two "
-        f"deciles capture 36% of all actual MPHH converters -- meaning a campaign targeting "
+        f"deciles capture 36% of all actual MPHH converters, meaning a campaign targeting "
         f"only the top 20% of scored households reaches more than one-third of all conversions "
         f"at a fraction of the outreach cost. Top decile lift: 2.05x the baseline rate."
     )
+    with st.expander("About these charts"):
+        st.markdown(
+            f"<p style='font-size:14px;color:{BLACK};'>"
+            "<b>Lift chart:</b> Shows how much better the model predicts converters than random selection. "
+            "A lift of 2.05 at decile 1 means households in the top score bucket convert at 2.05x the overall rate. "
+            "<b>Cumulative gain curve:</b> Shows what share of all actual converters are captured if you contact only "
+            "the top N deciles. The steeper the curve above the diagonal, the better the model separates converters from non-converters. "
+            "<b>Feature importance:</b> Measures how much each input shifted predicted conversion probability on average across all training examples. "
+            "<b>Confusion matrix:</b> Shows model accuracy on held-out test data. Navy cells (top-left, bottom-right) are correct predictions; "
+            "red cells are errors."
+            "</p>", unsafe_allow_html=True)
 
     section_header(
         "Model Lift and Cumulative Gain",
@@ -1073,6 +1115,10 @@ def render_model_risk(df, fdf):
         fig_gain.update_layout(layout_gain)
         st.plotly_chart(fig_gain, use_container_width=True, config={"displayModeBar": False})
 
+    st.markdown(
+        '<hr style="border: none; border-top: 1.5px dotted #CCCCCC; margin: 18px 0;">',
+        unsafe_allow_html=True,
+    )
     # SHAP-style feature importance + confusion matrix
     section_header("Feature Importance and Model Accuracy")
     section_subtitle(
@@ -1129,19 +1175,20 @@ def render_model_risk(df, fdf):
     with col4:
         # Confusion matrix: TN top-left, FP top-right, FN bottom-left, TP bottom-right
         tn, fp, fn, tp = cm.ravel()
-        cm_matrix = np.array([[tn, fp], [fn, tp]])
-        cm_labels = [["True Negative", "False Positive"], ["False Negative", "True Positive"]]
+        # z_color: 0 = correct (NAVY), 1 = incorrect (RED_SOFT)
+        z_color = np.array([[0.0, 1.0], [1.0, 0.0]])
         cm_text = [[f"{tn:,}", f"{fp:,}"], [f"{fn:,}", f"{tp:,}"]]
 
         fig_cm = go.Figure(go.Heatmap(
-            z=cm_matrix,
+            z=z_color,
             x=["Predicted: No Convert", "Predicted: Convert"],
             y=["Actual: No Convert", "Actual: Convert"],
             text=cm_text,
             texttemplate="%{text}",
             textfont=dict(size=18, color=WHITE),
-            colorscale=[[0, STEEL_100], [0.5, BLUE_500], [1, NAVY]],
+            colorscale=[[0.0, NAVY], [1.0, RED_SOFT]],
             showscale=False,
+            zmin=0, zmax=1,
             hovertemplate="<b>%{y}</b><br>%{x}<br>Count: %{text}<extra></extra>",
         ))
         layout_cm = base_layout(380)
@@ -1159,10 +1206,10 @@ def render_model_risk(df, fdf):
         recall = tp / (tp + fn) if (tp + fn) > 0 else 0
         st.markdown(
             f"<div style='font-size:13px;color:{BLACK};padding:8px 4px;'>"
-            f"<b>TP:</b> {tp:,} correctly predicted converters | "
-            f"<b>FP:</b> {fp:,} false alarms | "
-            f"<b>FN:</b> {fn:,} missed converters | "
-            f"<b>TN:</b> {tn:,} correctly predicted non-converters<br>"
+            f"<b>True Positives:</b> {tp:,} correctly predicted converters | "
+            f"<b>False Positives:</b> {fp:,} false alarms | "
+            f"<b>False Negatives:</b> {fn:,} missed converters | "
+            f"<b>True Negatives:</b> {tn:,} correctly predicted non-converters<br>"
             f"Accuracy: {accuracy:.3f} | Precision: {precision:.3f} | Recall: {recall:.3f} | AUC: {auc:.3f}"
             f"</div>",
             unsafe_allow_html=True,
@@ -1243,6 +1290,16 @@ def render_financial_impact(fdf, channels, products, tiers, tenure_range, owners
     section_header(
         "MPHH Conversion Revenue Simulator",
     )
+    with st.expander("About these charts"):
+        st.markdown(
+            f"<p style='font-size:14px;color:{BLACK};'>"
+            "<b>Revenue Simulator:</b> Adjusts save rate and contact cost to model how much net revenue "
+            "a targeted outreach program would generate from the unconverted household population. "
+            "The bar chart compares net revenue at six save-rate scenarios. "
+            "Net revenue = gross CLTV generated minus total outreach contact costs. "
+            "<b>Opportunity breakdown:</b> The donut and bar charts below decompose the CLTV opportunity "
+            "by home ownership type, highlighting where the largest unconverted dollar values sit."
+            "</p>", unsafe_allow_html=True)
     with st.expander("How the simulator works + CLTV definition"):
         st.markdown(
             f"<p style='font-size:14px;color:{BLACK};'>"
@@ -1309,13 +1366,17 @@ def render_financial_impact(fdf, channels, products, tiers, tenure_range, owners
             x=[f"{s}%" for s in scenarios],
             y=net_revs,
             marker_color=colors_bar,
-            text=[f"${v:.1f}M" for v in net_revs],
+            text=[f"${v:.1f}M net" for v in net_revs],
             textposition="outside",
             textfont=dict(size=12, color=NAVY),
+            hovertemplate="Save Rate: %{x} | Net Revenue after outreach costs: $%{y:.1f}M<extra></extra>",
         ))
         layout_sim = base_layout()
         layout_sim.update(dict(
-            title=dict(text="Net Revenue Impact by Save Rate Scenario", font=dict(size=13, color=NAVY), x=0.02),
+            title=dict(
+                text="Net Revenue Impact by Save Rate Scenario<br>"
+                     "<sup>Net revenue = gross CLTV generated minus total outreach contact costs at the selected cost per contact.</sup>",
+                font=dict(size=13, color=NAVY), x=0.02),
             xaxis=dict(title="Save Rate", color=BLACK),
             yaxis=dict(title="Net Revenue ($M)", color=BLACK),
         ))
@@ -1386,7 +1447,7 @@ def render_financial_impact(fdf, channels, products, tiers, tenure_range, owners
 # TAB 5: HEALTHCARE APPLICATION
 # ============================================================
 def render_healthcare_apply():
-    section_header("Cross-Industry Translation: Insurance to Healthcare")
+    section_header("Cross-Industry Translation: Insurance to Healthcare", margin_top=8)
 
     col_a, col_b = st.columns([1, 1])
 
@@ -1465,28 +1526,30 @@ def render_healthcare_apply():
                 unsafe_allow_html=True,
             )
 
-    section_header("Framework Portability")
+    section_header("Framework Portability", margin_top=8)
     st.markdown(
         f'<div class="summary-tile" style="min-height:auto;">'
-        f'<p>This MPHH propensity framework is portable because the core logic -- '
-        f'identify households with a behavioral signal (quote start, inquiry, portal visit), '
-        f'optimize outreach frequency, prioritize high-value segments by channel and tier -- '
-        f'applies wherever a customer holds one product and a second exists to be sold. '
-        f'The model features require minimal relabeling. The financial impact simulator '
-        f'only needs updated premium and margin inputs to reflect the new industry.'
-        f'</p></div>',
+        f'<ul style="margin:0;padding-left:20px;line-height:1.7;font-size:14px;color:{BLACK};">'
+        f'<li>This MPHH propensity framework is portable because its core logic applies wherever '
+        f'a customer holds one product and a second exists to be sold.</li>'
+        f'<li>The framework identifies households with a behavioral signal (quote start, inquiry, portal visit), '
+        f'optimizes outreach frequency, and prioritizes high-value segments by channel and tier.</li>'
+        f'<li>The model features require minimal relabeling.</li>'
+        f'<li>The financial impact simulator only needs updated premium and margin inputs to reflect the new industry.</li>'
+        f'</ul></div>',
         unsafe_allow_html=True,
     )
 
-    section_header("Closing Takeaway")
+    section_header("Closing Takeaway", margin_top=8)
     st.markdown(
         f'<div class="summary-tile" style="min-height:auto;">'
-        f'<p>The skills that make a strong MPHH analyst at AutoShield -- building propensity '
-        f'models, quantifying CLTV opportunity, designing outreach simulations, and communicating '
-        f'findings to sales and product leadership -- transfer directly to any industry where '
-        f'cross-sell and retention analytics drive revenue strategy. The framework, not just '
-        f'the domain knowledge, is the reusable asset.'
-        f'</p></div>',
+        f'<ul style="margin:0;padding-left:20px;line-height:1.7;font-size:14px;color:{BLACK};">'
+        f'<li>The skills that make a strong MPHH analyst at AutoShield transfer directly to any industry '
+        f'where cross-sell and retention analytics drive revenue strategy.</li>'
+        f'<li>These skills include building propensity models, quantifying CLTV opportunity, designing '
+        f'outreach simulations, and communicating findings to sales and product leadership.</li>'
+        f'<li>The framework, not just the domain knowledge, is the reusable asset.</li>'
+        f'</ul></div>',
         unsafe_allow_html=True,
     )
 
@@ -1500,7 +1563,7 @@ def render_recommendations():
         "recommendations are prioritized by expected impact, implementation complexity, and "
         "alignment with the Robertson Strategy's Multiproduct Household growth objectives. "
         "The Robertson Strategy targets a specific high-value customer demographic known "
-        "internally as the Robertsons -- long-tenured households who hold multiple product "
+        "internally as the Robertsons: long-tenured households who hold multiple product "
         "policies, pay reliably through annual payment or auto-pay, and demonstrate strong "
         "brand loyalty. The strategy deepens engagement by expanding their product portfolio "
         "and keeping them within the AutoShield household."
@@ -1528,7 +1591,7 @@ def render_recommendations():
                             "reporting table. This creates the data pipeline that all downstream "
                             "campaigns depend on and demonstrates pipeline ownership.",
                 "evidence": "Query 12 produces prioritized candidate lists by channel, score, "
-                            "and intervention segment -- ready for CRM upload.",
+                            "and intervention segment, ready for CRM upload.",
             },
         ],
         "Short-Term Actions (30-90 Days)": [
@@ -1549,7 +1612,7 @@ def render_recommendations():
                 "value":    "Est. $890K incremental CLTV",
                 "effort":   "Medium effort",
                 "body":     "Elite and Plus tier homeowners through Independent Agent channel "
-                            "convert at over 38% -- the highest rate of any segment. A dedicated "
+                            "convert at over 38%, the highest rate of any segment. A dedicated "
                             "agent playbook and accelerated underwriting path for this segment "
                             "would further increase velocity and premium attachment.",
                 "evidence": "Segment analysis: IA + Elite + Auto households: 38.2% conversion, "
@@ -1564,7 +1627,7 @@ def render_recommendations():
                 "body":     "The GBM model trained here should be retrained on real AutoShield "
                             "data and deployed as a scored Snowflake view refreshed nightly. "
                             "Scores should flow into agent dashboards (Salesforce or equivalent) "
-                            "so agents see conversion likelihood at the point of renewal contact -- "
+                            "so agents see conversion likelihood at the point of renewal contact, "
                             "turning every renewal into a cross-sell opportunity.",
                 "evidence": "Model AUC 0.69 on synthetic data. Top two deciles capture 36% of "
                             "all converters at 2.05x the baseline conversion rate. At scale, "
@@ -1575,12 +1638,16 @@ def render_recommendations():
                 "value":    "Executive reporting infrastructure",
                 "effort":   "High effort",
                 "body":     "Productionize this Streamlit dashboard (or port to Tableau/Power BI) "
-                            "as the Agency Operations MPHH performance tracker. Add quarterly "
-                            "cohort retention views, agent-level leaderboards, and YoY MPHH "
-                            "growth tracking to support the Robertson Strategy reporting cadence.",
+                            "as the Agency Operations MPHH performance tracker. "
+                            "A working prototype of this dashboard has already been built as part "
+                            "of this portfolio project and is available at the link below. "
+                            "The production version would connect to live AutoShield data sources "
+                            "and refresh on a scheduled pipeline.",
                 "evidence": "Current reporting gap: no unified view of MPHH conversion rate, "
                             "CLTV opportunity, and campaign ROI in one dashboard. "
                             "This closes that gap for sales leadership and BI partners.",
+                "url":      "https://benchmarkingapppy-vjccagmtcwt2fdtbrzrjtx.streamlit.app/",
+                "url_label": "View Working Prototype",
             },
         ],
     }
@@ -1591,20 +1658,39 @@ def render_recommendations():
         "Strategic Investments (90+ Days)": NAVY,
     }
 
+    def _fmt_body(text):
+        sentences = [s.strip() for s in text.split(". ") if s.strip()]
+        if len(sentences) > 2:
+            formatted = []
+            for i, s in enumerate(sentences):
+                if i < len(sentences) - 1:
+                    formatted.append(s + ".")
+                else:
+                    formatted.append(s if s.endswith(".") else s + ".")
+            li_items = "".join(f"<li>{s}</li>" for s in formatted)
+            return f'<ul style="margin:0;padding-left:20px;line-height:1.7;">{li_items}</ul>'
+        return text
+
     for tier, rec_list in recs.items():
-        section_header(tier)
+        c = tier_colors[tier]
+        section_header(tier, border_color=c)
         for rec in rec_list:
-            c = tier_colors[tier]
+            url_html = (
+                f'<div style="margin-top:8px;font-size:13px;">'
+                f'<a href="{rec["url"]}" target="_blank" style="color:{BLUE_700};font-weight:600;">'
+                f'{rec.get("url_label", rec["url"])}</a></div>'
+                if rec.get("url") else ""
+            )
             st.markdown(
                 f'<div class="rec-card" style="border-left-color:{c};">'
-                f'<div class="tier-label">{tier}</div>'
                 f'<div class="rec-title">{rec["title"]}</div>'
                 f'<div class="badge-row">'
                 f'<span class="badge badge-value">{rec["value"]}</span>'
                 f'<span class="badge badge-effort">{rec["effort"]}</span>'
                 f'</div>'
-                f'<div class="rec-body">{rec["body"]}</div>'
+                f'<div class="rec-body">{_fmt_body(rec["body"])}</div>'
                 f'<div class="evidence"><strong>Evidence:</strong> {rec["evidence"]}</div>'
+                f'{url_html}'
                 f'</div>',
                 unsafe_allow_html=True,
             )
@@ -1635,8 +1721,8 @@ def main():
         "Cross-Sell Drivers",
         "Model + Risk",
         "Financial Impact",
-        "Healthcare Application",
         "Recommendations",
+        "Healthcare Application",
     ])
 
     with tabs[0]:
@@ -1648,9 +1734,9 @@ def main():
     with tabs[3]:
         render_financial_impact(fdf, channels, products, tiers, tenure_range, ownership, df)
     with tabs[4]:
-        render_healthcare_apply()
-    with tabs[5]:
         render_recommendations()
+    with tabs[5]:
+        render_healthcare_apply()
 
 
 if __name__ == "__main__":

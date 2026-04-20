@@ -17,14 +17,14 @@ engagement with this demographic by expanding their product portfolio and ensuri
 they remain within the AutoShield household.
 
 Tab index:
-    render_kpi_header           -- persistent KPI row above all tabs
-    render_sidebar              -- all filters
-    render_robinson_tracker     -- Tab 1: Robertson Strategy Tracker
-    render_yoy_growth           -- Tab 2: YoY Growth
-    render_cohort_retention     -- Tab 3: Cohort Retention
-    render_agent_leaderboard    -- Tab 4: Agent Leaderboard
-    render_state_performance    -- Tab 5: State Performance
-    render_pipeline_health      -- Tab 6: Pipeline Health
+    render_kpi_header           : persistent KPI row above all tabs
+    render_sidebar              : all filters
+    render_robinson_tracker     : Tab 1: Robertson Strategy Tracker
+    render_yoy_growth           : Tab 2: YoY Growth
+    render_cohort_retention     : Tab 3: Cohort Retention
+    render_agent_leaderboard    : Tab 4: Agent Leaderboard
+    render_state_performance    : Tab 5: State Performance
+    render_pipeline_health      : Tab 6: Pipeline Health
 """
 
 # ============================================================
@@ -95,7 +95,7 @@ def inject_css():
         background: {WHITE};
         border-left: 4px solid {BLUE_700};
         border-radius: 6px;
-        padding: 12px 16px 10px 16px;
+        padding: 0 16px 10px 16px;
         margin-bottom: 8px;
         box-shadow: 0 1px 4px rgba(0,0,0,0.07);
     }}
@@ -107,7 +107,7 @@ def inject_css():
         margin-bottom: 14px;
     }}
     .insight-strip .label {{
-        font-size: 11px;
+        font-size: 17px;
         font-weight: 700;
         letter-spacing: 0.08em;
         color: {NAVY};
@@ -115,7 +115,7 @@ def inject_css():
         margin-bottom: 4px;
     }}
     .insight-strip .body {{
-        font-size: 14px;
+        font-size: 16px;
         color: {NAVY};
         line-height: 1.55;
     }}
@@ -357,16 +357,34 @@ def init_session_state(df):
 # HELPERS
 # ============================================================
 def insight(label, body):
+    sentences = [s.strip() for s in body.split(". ") if s.strip()]
+    if len(sentences) > 1:
+        formatted = []
+        for i, s in enumerate(sentences):
+            if i < len(sentences) - 1:
+                formatted.append(s + ".")
+            else:
+                formatted.append(s if s.endswith(".") else s + ".")
+        li_items = "".join(f"<li>{s}</li>" for s in formatted)
+        body_html = f'<ul style="margin:0;padding-left:20px;line-height:1.7;">{li_items}</ul>'
+    else:
+        body_html = body
     st.markdown(
         f'<div class="insight-strip"><div class="label">{label}</div>'
-        f'<div class="body">{body}</div></div>',
+        f'<div class="body">{body_html}</div></div>',
         unsafe_allow_html=True,
     )
 
 
-def section_header(title, subtitle=None):
+def section_header(title, subtitle=None, border_color=None, margin_top=None):
+    style = ""
+    if border_color:
+        style += f"border-left-color:{border_color};"
+    if margin_top is not None:
+        style += f"margin-top:{margin_top}px;"
+    style_attr = f' style="{style}"' if style else ""
     st.markdown(
-        f'<div class="section-header"><h4>{title}</h4></div>',
+        f'<div class="section-header"{style_attr}><h4>{title}</h4></div>',
         unsafe_allow_html=True,
     )
     if subtitle:
@@ -392,6 +410,8 @@ def status_tile(title, value, sub, border_color=BLUE_700):
 
 
 def sparkline_mini(values, color=BLUE_700):
+    min_val = min(values) if values else 0
+    max_val = max(values) if values else 1
     fig = go.Figure(go.Scatter(
         x=list(range(len(values))), y=values,
         mode="lines",
@@ -405,7 +425,7 @@ def sparkline_mini(values, color=BLUE_700):
         plot_bgcolor="rgba(0,0,0,0)",
         margin=dict(l=0, r=0, t=0, b=0),
         xaxis=dict(visible=False),
-        yaxis=dict(visible=False),
+        yaxis=dict(visible=False, range=[min_val * 0.85, max_val * 1.15]),
         showlegend=False,
     )
     return fig
@@ -577,7 +597,7 @@ def render_robinson_tracker(fdf):
 
     insight(
         "Robertson Strategy Status",
-        f"The most recent quarter ({latest_q['quarter']}) shows an MPHH rate of "
+        f"The most recent quarter ({latest_q['quarter']}) shows a Multiproduct Household (MPHH) rate of "
         f"{latest_q['rate_pct']:.2f}% against a Robertson Strategy target of "
         f"{latest_q['target_pct']:.1f}% ({gap_str}). "
         f"The portfolio has been behind target in {len(behind_qtrs)} of "
@@ -601,13 +621,12 @@ def render_robinson_tracker(fdf):
             hovertemplate="Target: %{y:.1f}%<extra></extra>",
         ))
 
-        # Color actual line by on/behind status
+        # Markers always BLUE_700 to match the line; status is shown in the gap chart below
         for _, row in qs.iterrows():
-            color = GREEN_700 if row["status"] == "On Track" else RED_SOFT
             fig.add_trace(go.Scatter(
                 x=[row["quarter"]], y=[row["rate_pct"]],
                 mode="markers",
-                marker=dict(color=color, size=10, line=dict(color=WHITE, width=2)),
+                marker=dict(color=BLUE_700, size=10, line=dict(color=WHITE, width=2)),
                 showlegend=False,
                 hovertemplate=(
                     f"<b>{row['quarter']}</b><br>"
@@ -629,7 +648,7 @@ def render_robinson_tracker(fdf):
         layout = base_layout(340)
         layout.update(dict(
             title=dict(text="", font=dict(size=14, color=NAVY), x=0.02),
-            xaxis=dict(color=BLACK, tickangle=-30),
+            xaxis=dict(color=BLACK, tickangle=0, tickfont=dict(size=10)),
             yaxis=dict(
                 title="MPHH Conversion Rate (%)",
                 color=BLACK,
@@ -642,7 +661,16 @@ def render_robinson_tracker(fdf):
 
     with col2:
         section_header("Quarterly Status Summary")
-        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown(
+            f"<div style='display:flex;align-items:center;padding:6px 0;"
+            f"border-bottom:2px solid {BLUE_700};margin-bottom:4px;'>"
+            f"<span style='font-weight:700;color:{NAVY};width:72px;font-size:12px;text-transform:uppercase;letter-spacing:0.06em;'>Quarter</span>"
+            f"<span style='flex:1;font-size:12px;font-weight:700;color:{NAVY};text-transform:uppercase;letter-spacing:0.06em;'>Actual / Target</span>"
+            f"<span style='font-size:12px;font-weight:700;color:{NAVY};width:60px;text-align:right;text-transform:uppercase;letter-spacing:0.06em;'>Gap</span>"
+            f"&nbsp;&nbsp;<span style='font-size:12px;font-weight:700;color:{NAVY};text-transform:uppercase;letter-spacing:0.06em;'>Status</span>"
+            f"</div>",
+            unsafe_allow_html=True,
+        )
         for _, row in qs.dropna(subset=["rate_pct"]).iterrows():
             badge_cls = "badge-on-track" if row["status"] == "On Track" else "badge-behind"
             gap_color = GREEN_900 if row["vs_target"] >= 0 else RED_SOFT
@@ -688,8 +716,8 @@ def render_robinson_tracker(fdf):
         ))
         layout_gap = base_layout()
         layout_gap.update(dict(
-            title=dict(text="Gap vs. Robinson Target by Quarter", font=dict(size=13, color=NAVY), x=0.02),
-            xaxis=dict(color=BLACK, tickangle=-30),
+            title=dict(text="Gap vs. Robertson Target by Quarter", font=dict(size=13, color=NAVY), x=0.02),
+            xaxis=dict(color=BLACK, tickangle=0, tickfont=dict(size=10)),
             yaxis=dict(title="Gap (percentage points)", color=BLACK, zeroline=True,
                        zerolinecolor=GRAY_300, zerolinewidth=1.5),
         ))
@@ -722,9 +750,9 @@ def render_robinson_tracker(fdf):
         layout_vol = base_layout()
         layout_vol.update(dict(
             title=dict(text="Quarterly Conversion Volume and Rate", font=dict(size=13, color=NAVY), x=0.02),
-            xaxis=dict(color=BLACK, tickangle=-30),
+            xaxis=dict(color=BLACK, tickangle=0, tickfont=dict(size=10)),
             yaxis=dict(title="Converted Households", color=BLUE_700),
-            yaxis2=dict(title="MPHH Rate (%)", color=ORANGE_700, overlaying="y", side="right"),
+            yaxis2=dict(title="MPHH Rate (%)", color=ORANGE_700, overlaying="y", side="right", range=[0, 28]),
             legend=dict(orientation="h", x=0.5, xanchor="center", y=-0.22),
             barmode="group",
         ))
@@ -766,7 +794,7 @@ def render_robinson_tracker(fdf):
     layout_stk = base_layout(320)
     layout_stk.update(dict(
         title=dict(text="", x=0.02),
-        xaxis=dict(color=BLACK, tickangle=-30),
+        xaxis=dict(color=BLACK, tickangle=0, tickfont=dict(size=10)),
         yaxis=dict(title="Converted Households", color=BLACK),
         barmode="stack",
         legend=dict(orientation="h", x=0.5, xanchor="center", y=-0.22),
@@ -820,12 +848,12 @@ def render_yoy_growth(fdf):
     col1, col2 = st.columns(2)
 
     with col1:
-        section_header("MPHH Rate: 2023 / 2024 / 2025 (Same Quarter)")
+        section_header("Multiproduct Household (MPHH) Rate: 2023 / 2024 / 2025 (Same Quarter)")
         fig_yoy = go.Figure()
         for yr, col_name, color in [
-            ("2023", "rate_2023", STEEL_300),
+            ("2023", "rate_2023", STEEL_700),
             ("2024", "rate_2024", BLUE_700),
-            ("2025", "rate_2025", GREEN_700),
+            ("2025", "rate_2025", NAVY),
         ]:
             vals = yoy_df[col_name]
             mask = vals.notna()
@@ -853,20 +881,26 @@ def render_yoy_growth(fdf):
     with col2:
         section_header("YoY Delta by Quarter (percentage points)")
         fig_delta = go.Figure()
-        for delta_col, label, color_pos, color_neg in [
-            ("delta_23_24", "2023→2024", BLUE_700, STEEL_300),
-            ("delta_24_25", "2024→2025", GREEN_700, RED_SOFT),
+        for delta_col, label, color_pos, color_neg, base_yr, cmp_yr in [
+            ("delta_23_24", "2023→2024", BLUE_700, STEEL_300, "2023", "2024"),
+            ("delta_24_25", "2024→2025", GREEN_700, RED_SOFT,  "2024", "2025"),
         ]:
             vals = yoy_df[delta_col]
             mask = vals.notna()
             if mask.any():
                 bar_colors = [color_pos if v >= 0 else color_neg for v in vals[mask]]
+                directions = ["higher" if v >= 0 else "lower" for v in vals[mask]]
                 fig_delta.add_trace(go.Bar(
                     x=yoy_df.loc[mask, "label"], y=vals[mask],
                     name=label, marker_color=bar_colors,
                     text=[f"{v:+.2f}pp" for v in vals[mask]],
                     textposition="outside", textfont=dict(size=11, color=NAVY),
-                    hovertemplate=f"<b>{label} %{{x}}</b><br>Delta: %{{y:+.2f}}pp<extra></extra>",
+                    customdata=[[d] for d in directions],
+                    hovertemplate=(
+                        f"<b>Quarter: %{{x}}</b><br>"
+                        f"{cmp_yr} rate was %{{y:+.2f}} percentage points %{{customdata[0]}} than {base_yr}"
+                        "<extra></extra>"
+                    ),
                 ))
         layout_delta = base_layout()
         layout_delta.update(dict(
@@ -882,7 +916,7 @@ def render_yoy_growth(fdf):
         fig_delta.update_layout(layout_delta)
         st.plotly_chart(fig_delta, use_container_width=True, config={"displayModeBar": False}, key="chart_delta")
 
-    # YoY by channel — 3 years
+    # YoY by channel - 3 years
     section_header(
         "YoY Rate Change by Channel",
         subtitle="Conversion rate per channel across all three years. Delta bars show 2023→2024 and 2024→2025 changes."
@@ -910,7 +944,7 @@ def render_yoy_growth(fdf):
         col3, col4 = st.columns(2)
         with col3:
             fig_ch_bar = go.Figure()
-            yr_colors = {"2023": STEEL_300, "2024": BLUE_700, "2025": GREEN_700}
+            yr_colors = {"2023": STEEL_700, "2024": BLUE_700, "2025": NAVY}
             for yr in available_years:
                 fig_ch_bar.add_trace(go.Bar(
                     x=ch_pivot["channel"], y=ch_pivot[yr],
@@ -937,17 +971,24 @@ def render_yoy_growth(fdf):
             fig_ch_d = go.Figure()
             delta_pairs = []
             if "2023" in ch_pivot.columns and "2024" in ch_pivot.columns:
-                delta_pairs.append(("2023→2024", ch_pivot["2024"] - ch_pivot["2023"], BLUE_700, STEEL_300))
+                delta_pairs.append(("2023→2024", ch_pivot["2024"] - ch_pivot["2023"], BLUE_700, STEEL_300, "2024", "2023"))
             if "2024" in ch_pivot.columns and "2025" in ch_pivot.columns:
-                delta_pairs.append(("2024→2025", ch_pivot["2025"] - ch_pivot["2024"], GREEN_700, RED_SOFT))
-            for d_label, d_vals, c_pos, c_neg in delta_pairs:
+                delta_pairs.append(("2024→2025", ch_pivot["2025"] - ch_pivot["2024"], GREEN_700, RED_SOFT, "2025", "2024"))
+            for d_label, d_vals, c_pos, c_neg, cmp_yr, base_yr in delta_pairs:
                 d_colors = [c_pos if v >= 0 else c_neg for v in d_vals]
+                verbs = ["improved" if v >= 0 else "declined" for v in d_vals]
+                abs_vals = [abs(v) for v in d_vals]
                 fig_ch_d.add_trace(go.Bar(
                     x=ch_pivot["channel"], y=d_vals,
                     name=d_label, marker_color=d_colors,
                     text=[f"{v:+.2f}pp" for v in d_vals],
                     textposition="outside", textfont=dict(size=11, color=NAVY),
-                    hovertemplate=f"<b>{d_label} %{{x}}</b><br>%{{y:+.2f}}pp<extra></extra>",
+                    customdata=[[verbs[i], abs_vals[i]] for i in range(len(d_vals))],
+                    hovertemplate=(
+                        f"<b>%{{x}}</b> conversion rate %{{customdata[0]}} by "
+                        f"%{{customdata[1]:.2f}} percentage points in {cmp_yr} compared to {base_yr}"
+                        "<extra></extra>"
+                    ),
                 ))
             layout_chd = base_layout()
             layout_chd.update(dict(
@@ -971,13 +1012,15 @@ def render_yoy_growth(fdf):
     cltv_year.columns = ["year", "avg_cltv", "total_cltv"]
     cltv_year["total_cltv_M"] = cltv_year["total_cltv"] / 1e6
 
+    yr_color_map = {"2023": STEEL_700, "2024": BLUE_700, "2025": NAVY}
     col5, col6 = st.columns(2)
     with col5:
+        cltv_colors = [yr_color_map.get(str(yr), BLUE_700) for yr in cltv_year["year"]]
         fig_cltv = go.Figure(go.Bar(
             x=cltv_year["year"], y=cltv_year["avg_cltv"],
-            marker_color=[STEEL_300, BLUE_700][:len(cltv_year)],
-            text=[f"${v:,.0f}" for v in cltv_year["avg_cltv"]],
-            textposition="outside", textfont=dict(size=13, color=NAVY),
+            marker_color=cltv_colors,
+            text=[f"<b>{yr}</b><br>${v:,.0f}" for yr, v in zip(cltv_year["year"], cltv_year["avg_cltv"])],
+            textposition="inside", textfont=dict(size=11, color=WHITE),
             hovertemplate="<b>%{x}</b><br>Avg CLTV: $%{y:,.0f}<extra></extra>",
         ))
         layout_cltv = base_layout()
@@ -991,11 +1034,12 @@ def render_yoy_growth(fdf):
         st.plotly_chart(fig_cltv, use_container_width=True, config={"displayModeBar": False}, key="chart_cltv")
 
     with col6:
+        tcltv_colors = [yr_color_map.get(str(yr), BLUE_700) for yr in cltv_year["year"]]
         fig_tcltv = go.Figure(go.Bar(
             x=cltv_year["year"], y=cltv_year["total_cltv_M"],
-            marker_color=[STEEL_300, GREEN_700][:len(cltv_year)],
-            text=[f"${v:.1f}M" for v in cltv_year["total_cltv_M"]],
-            textposition="outside", textfont=dict(size=13, color=NAVY),
+            marker_color=tcltv_colors,
+            text=[f"<b>{yr}</b><br>${v:.1f}M" for yr, v in zip(cltv_year["year"], cltv_year["total_cltv_M"])],
+            textposition="inside", textfont=dict(size=11, color=WHITE),
             hovertemplate="<b>%{x}</b><br>Total CLTV: $%{y:.1f}M<extra></extra>",
         ))
         layout_tcltv = base_layout()
@@ -1017,14 +1061,14 @@ def render_cohort_retention(fdf):
 
     insight(
         "Cohort Retention View",
-        "The heatmap shows MPHH conversion rate by acquisition quarter (rows) and household "
+        "The heatmap shows Multiproduct Household (MPHH) conversion rate by acquisition quarter (rows) and household "
         "tenure bucket (columns). Darker cells indicate higher conversion rates. The 24-35 month "
-        "tenure bucket consistently shows the strongest conversion lift across all cohorts -- "
-        "this is the optimal window for cross-sell outreach."
+        "tenure bucket consistently shows the strongest conversion lift across all cohorts. "
+        "This is the optimal window for cross-sell outreach."
     )
 
     section_header(
-        "MPHH Conversion Rate Heatmap -- Quarter x Tenure Bucket",
+        "Multiproduct Household (MPHH) Conversion Rate Heatmap: Quarter by Tenure Bucket",
         subtitle="Each cell = conversion rate for households acquired in that quarter at that tenure stage. "
                  "Darker blue = higher conversion. Use this to time outreach by cohort maturity."
     )
@@ -1034,6 +1078,11 @@ def render_cohort_retention(fdf):
     y_labels = matrix.index.tolist()
 
     text_vals = [[f"{v:.1f}%" if not np.isnan(v) else "" for v in row] for row in z_vals]
+    # Per-cell font color: WHITE for cells above 26%, BLACK for 26% or below
+    font_colors = [
+        [WHITE if (not np.isnan(v) and v > 26) else BLACK for v in row]
+        for row in z_vals
+    ]
 
     fig_heat = go.Figure(go.Heatmap(
         z=z_vals,
@@ -1041,18 +1090,28 @@ def render_cohort_retention(fdf):
         y=y_labels,
         text=text_vals,
         texttemplate="%{text}",
-        textfont=dict(size=12, color=BLACK),
         colorscale=[[0, STEEL_100], [0.4, BLUE_500], [1.0, NAVY]],
         showscale=True,
         colorbar=dict(title="Rate (%)", tickfont=dict(size=11)),
         hovertemplate="<b>%{y}</b> | Tenure: %{x}<br>Conversion rate: %{z:.2f}%<extra></extra>",
         zmin=18, zmax=32,
     ))
+    # Add per-cell text annotations with conditional font color
+    for i, y_label in enumerate(y_labels):
+        for j, x_label in enumerate(x_labels):
+            val = z_vals[i, j]
+            if not np.isnan(val):
+                fig_heat.add_annotation(
+                    x=x_label, y=y_label,
+                    text=f"{val:.1f}%",
+                    showarrow=False,
+                    font=dict(color=font_colors[i][j], size=11),
+                )
     layout_heat = base_layout(420)
     layout_heat.update(dict(
         title=dict(text="", x=0.02),
-        xaxis=dict(title="Tenure Bucket", color=BLACK, tickfont=dict(size=12)),
-        yaxis=dict(title="Acquisition Quarter", color=BLACK, tickfont=dict(size=12), autorange="reversed"),
+        xaxis=dict(title="Tenure Bucket", color=BLACK, tickfont=dict(size=10), tickangle=0),
+        yaxis=dict(title="Acquisition Quarter", color=BLACK, tickfont=dict(size=11), autorange="reversed"),
     ))
     fig_heat.update_layout(layout_heat)
     st.plotly_chart(fig_heat, use_container_width=True, config={"displayModeBar": False}, key="chart_heat")
@@ -1088,7 +1147,7 @@ def render_cohort_retention(fdf):
         st.plotly_chart(fig_tb, use_container_width=True, config={"displayModeBar": False}, key="chart_tb")
 
     with col2:
-        section_header("Cohort Maturity Trend -- 60+ Month Retention Rate by Acquisition Quarter")
+        section_header("Cohort Maturity Trend: 60+ Month Retention Rate by Acquisition Quarter")
         section_subtitle("How do long-tenure (60+ month) households in each cohort convert over time?")
         if "60+mo" in matrix.columns:
             long_tenure = matrix["60+mo"].dropna().reset_index()
@@ -1109,7 +1168,7 @@ def render_cohort_retention(fdf):
             layout_lt = base_layout()
             layout_lt.update(dict(
                 title=dict(text="", x=0.02),
-                xaxis=dict(color=BLACK, tickangle=-30),
+                xaxis=dict(color=BLACK, tickangle=0, tickfont=dict(size=10)),
                 yaxis=dict(title="Conversion Rate (%)", color=BLACK,
                            range=[22, 32]),
             ))
@@ -1124,7 +1183,7 @@ def render_cohort_retention(fdf):
     cohort_defs = [
         (["2023Q1", "2023Q2"], "2023 (Early)",  STEEL_700),
         (["2024Q1", "2024Q2"], "2024 (Mid)",    BLUE_700),
-        (["2025Q3", "2025Q4"], "2025 (Recent)", ORANGE_700),
+        (["2025Q3", "2025Q4"], "2025 (Recent)", NAVY),
     ]
     cohort_frames = []
     for quarters, label, _ in cohort_defs:
@@ -1167,16 +1226,29 @@ def render_cohort_retention(fdf):
 def render_agent_leaderboard(fdf):
     lb = build_agent_leaderboard(fdf)
 
-    top_agent = lb.iloc[0] if len(lb) > 0 else None
+    top_agent    = lb.iloc[0] if len(lb) > 0 else None
     total_agents = len(lb)
-    ia_lb = lb[lb["agency_channel"] == "Independent Agent"]
-    top_by_rate = lb.sort_values("rate_pct", ascending=False).iloc[0]
+    ia_lb        = lb[lb["agency_channel"] == "Independent Agent"]
+    top_by_rate  = lb.sort_values("rate_pct", ascending=False).iloc[0] if len(lb) > 0 else None
+
+    if len(ia_lb) > 0:
+        ia_top_rate  = ia_lb.sort_values("rate_pct", ascending=False).iloc[0]["rate_pct"]
+        channel_note = (
+            f"When ranked by conversion rate, Independent Agents hold the top positions. "
+            f"The top IA agent converts at {ia_top_rate:.1f}%. "
+        )
+    elif top_by_rate is not None:
+        channel_note = (
+            f"The top-ranked agent by conversion rate is from "
+            f"{top_by_rate['agency_channel']} at {top_by_rate['rate_pct']:.1f}%. "
+        )
+    else:
+        channel_note = ""
 
     insight(
         "Leaderboard Insight",
-        f"Rankings cover {total_agents:,} agents with 50+ household assignments. "
-        f"When ranked by conversion rate, Independent Agents hold the top positions -- "
-        f"the top IA agent converts at {lb[lb['agency_channel']=='Independent Agent'].sort_values('rate_pct',ascending=False).iloc[0]['rate_pct']:.1f}%. "
+        f"Rankings cover {total_agents:,} agents with 50+ Multiproduct Household (MPHH) assignments. "
+        + channel_note +
         f"Direct Online agents lead on total conversions due to higher household volume per agent. "
         f"Use the rank mode selector to compare coaching priorities across both dimensions."
     )
@@ -1264,7 +1336,11 @@ def render_agent_leaderboard(fdf):
                     y=sub, name=ch,
                     marker_color=color,
                     boxmean=True,
-                    hovertemplate=f"<b>{ch}</b><br>Rate: %{{y:.2f}}%<extra></extra>",
+                    hovertemplate=(
+                        f"<b>Channel: {ch}</b><br>"
+                        "Most agents in this channel convert between %{q1:.1f}% and %{q3:.1f}% of their households.<br>"
+                        "The middle agent converts at %{median:.1f}%.<extra></extra>"
+                    ),
                 ))
         layout_dist = base_layout(380)
         layout_dist.update(dict(
@@ -1280,7 +1356,7 @@ def render_agent_leaderboard(fdf):
     st.markdown("<br>", unsafe_allow_html=True)
     section_header(
         "Regional and Tier Performance",
-        subtitle="Average agent metrics by region. Identify which regions have the highest performance ceiling and widest agent spread."
+        subtitle="Average conversion rate by region across all agent types combined, including Independent Agents, Captive Agents, Call Center representatives, and Direct Online volume. Use the channel filter above the leaderboard to isolate a specific agent type."
     )
     col3, col4 = st.columns(2)
 
@@ -1366,8 +1442,8 @@ def render_state_performance(fdf):
 
     insight(
         "State Performance",
-        f"MPHH conversion rates range from {bot_state['rate_pct']:.2f}% ({bot_state['state']}) "
-        f"to {top_state['rate_pct']:.2f}% ({top_state['state']}) -- a {spread:.2f} percentage "
+        f"Multiproduct Household (MPHH) conversion rates range from {bot_state['rate_pct']:.2f}% ({bot_state['state']}) "
+        f"to {top_state['rate_pct']:.2f}% ({top_state['state']}), a {spread:.2f} percentage "
         f"point spread. OH, GA, and IL lead on conversion rate. CA underperforms the portfolio "
         f"average and warrants a channel-mix or outreach-program review."
     )
@@ -1383,7 +1459,7 @@ def render_state_performance(fdf):
                 for v in state_stats["rate_pct"]
             ],
             text=[f"{v:.2f}%" for v in state_stats["rate_pct"]],
-            textposition="outside", textfont=dict(size=12, color=NAVY),
+            textposition="inside", textfont=dict(size=11, color=WHITE),
             customdata=np.stack([state_stats["converted"], state_stats["total"]], axis=-1),
             hovertemplate=(
                 "<b>%{x}</b><br>Rate: %{y:.2f}%<br>"
@@ -1395,6 +1471,7 @@ def render_state_performance(fdf):
             y=avg_line,
             line=dict(color=ORANGE_700, width=1.5, dash="dash"),
             annotation_text=f"Avg: {avg_line:.2f}%",
+            annotation_position="top right",
             annotation_font=dict(size=11, color=ORANGE_700),
         )
         layout_state = base_layout()
@@ -1471,19 +1548,31 @@ def render_state_performance(fdf):
         .mean() * 100
     ).unstack().round(2)
 
+    sc_z = sc_matrix.values
+    sc_x = sc_matrix.columns.tolist()
+    sc_y = sc_matrix.index.tolist()
+
     fig_sc = go.Figure(go.Heatmap(
-        z=sc_matrix.values,
-        x=sc_matrix.columns.tolist(),
-        y=sc_matrix.index.tolist(),
-        text=[[f"{v:.1f}%" if not np.isnan(v) else "" for v in row] for row in sc_matrix.values],
-        texttemplate="%{text}",
-        textfont=dict(size=12, color=BLACK),
+        z=sc_z,
+        x=sc_x,
+        y=sc_y,
         colorscale=[[0, STEEL_100], [0.5, BLUE_500], [1, NAVY]],
         showscale=True,
         colorbar=dict(title="Rate (%)", tickfont=dict(size=11)),
         hovertemplate="<b>%{y} | %{x}</b><br>Conversion rate: %{z:.2f}%<extra></extra>",
         zmin=15, zmax=35,
+        showlegend=False,
     ))
+    for i, y_lbl in enumerate(sc_y):
+        for j, x_lbl in enumerate(sc_x):
+            val = sc_z[i, j]
+            if not np.isnan(val):
+                fig_sc.add_annotation(
+                    x=x_lbl, y=y_lbl,
+                    text=f"{val:.1f}%",
+                    showarrow=False,
+                    font=dict(color=WHITE if val > 26 else BLACK, size=12),
+                )
     layout_sc = base_layout(360)
     layout_sc.update(dict(
         title=dict(text="", x=0.02),
@@ -1513,7 +1602,7 @@ def render_pipeline_health(fdf):
         f"Of {total:,} households, {quote_starts:,} ({quote_starts/total:.1%}) started a property "
         f"quote. Of those, {converted_w_quote:,} converted ({quote_cvr:.1%}) and "
         f"{abandoned:,} abandoned ({abandon_rate:.1%}). Quote starters convert at "
-        f"{quote_cvr/overall_cvr:.1f}x the rate of non-starters -- making abandonment "
+        f"{quote_cvr/overall_cvr:.1f}x the rate of non-starters, making abandonment "
         f"recovery the highest-leverage pipeline intervention available."
     )
 
@@ -1540,7 +1629,7 @@ def render_pipeline_health(fdf):
         ))
         layout_funnel = base_layout(340)
         layout_funnel.update(dict(
-            title=dict(text="MPHH Conversion Funnel", font=dict(size=13, color=NAVY), x=0.02),
+            title=dict(text="Multiproduct Household (MPHH) Conversion Funnel", font=dict(size=13, color=NAVY), x=0.02),
         ))
         fig_funnel.update_layout(layout_funnel)
         st.plotly_chart(fig_funnel, use_container_width=True, config={"displayModeBar": False}, key="chart_funnel")
@@ -1572,7 +1661,7 @@ def render_pipeline_health(fdf):
     section_header(
         "Outreach Program Effectiveness",
         subtitle="Tracks contact frequency against conversion outcome. "
-                 "The 1-3 contact band is the sweet spot -- above 3 contacts shows diminishing returns."
+                 "The 1-3 contact band is the sweet spot; above 3 contacts shows diminishing returns."
     )
 
     out_stats = (
@@ -1689,7 +1778,7 @@ def render_pipeline_health(fdf):
     layout_lead.update(dict(
         title=dict(text="Leading Indicators: Digital Engagement and Propensity by Quarter",
                    font=dict(size=13, color=NAVY), x=0.02),
-        xaxis=dict(color=BLACK, tickangle=-30),
+        xaxis=dict(color=BLACK, tickangle=0, tickfont=dict(size=10)),
         yaxis=dict(title="Avg Digital Score", color=BLUE_700),
         yaxis2=dict(title="Avg Propensity Score", color=GREEN_700, overlaying="y", side="right"),
         legend=dict(orientation="h", x=0.5, xanchor="center", y=-0.22),
