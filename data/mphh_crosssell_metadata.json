@@ -1,0 +1,39 @@
+{
+  "project": "MPHH Cross-Sell Propensity",
+  "version": "1.0",
+  "seed": 42,
+  "n_rows": 150000,
+  "generated_at": "2026-04-19T20:10:18.849717",
+  "target_variable": "converted_mphh",
+  "conversion_rate": 0.2606,
+  "columns": [
+    "household_id",
+    "snapshot_date",
+    "state",
+    "age_of_primary",
+    "home_ownership",
+    "household_size",
+    "income_band",
+    "agency_channel",
+    "anchor_product",
+    "policy_tier",
+    "tenure_months",
+    "outreach_contacts_12m",
+    "claims_24m",
+    "digital_engagement_score",
+    "property_quote_started",
+    "annual_premium_anchor",
+    "projected_mphh_cltv",
+    "propensity_score",
+    "propensity_tier",
+    "converted_mphh"
+  ],
+  "leakage_columns": [
+    "propensity_score",
+    "propensity_tier"
+  ],
+  "financial_columns": [
+    "annual_premium_anchor",
+    "projected_mphh_cltv"
+  ]
+}

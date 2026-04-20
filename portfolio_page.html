@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MPHH Cross-Sell Propensity — Luciano Casillas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ── TOKENS ─────────────────────────────────────────── */
+  :root {
+    --navy:      #0A3360;
+    --blue:      #0077B3;
+    --blue-lt:   #4EBEE5;
+    --steel:     #D1E2E5;
+    --slate:     #405E7C;
+    --bg:        #F7F9FB;
+    --surface:   #FFFFFF;
+    --ink:       #1A1E2E;
+    --muted:     #5A6478;
+    --green:     #08CAA9;
+    --orange:    #FF8A39;
+    --rule:      #E2E8F0;
+
+    --f-display: 'DM Serif Display', Georgia, serif;
+    --f-body:    'DM Sans', system-ui, sans-serif;
+    --f-mono:    'DM Mono', 'Courier New', monospace;
+
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* ── RESET ───────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; scroll-behavior: smooth; }
+  body {
+    font-family: var(--f-body);
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── LAYOUT ──────────────────────────────────────────── */
+  .page-wrap {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 32px 96px;
+  }
+
+  /* ── NAV BAR ─────────────────────────────────────────── */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 32px;
+    max-width: 960px;
+    margin: 0 auto;
+    border-bottom: 1px solid var(--rule);
+    opacity: 0;
+    animation: fadeUp 0.6s var(--ease) 0.1s forwards;
+  }
+  .nav-name {
+    font-family: var(--f-display);
+    font-size: 1.05rem;
+    color: var(--navy);
+    letter-spacing: -0.01em;
+  }
+  .nav-links { display: flex; gap: 28px; }
+  .nav-links a {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--blue); }
+
+  /* ── HERO ────────────────────────────────────────────── */
+  .hero {
+    padding: 64px 0 52px;
+    border-bottom: 1px solid var(--rule);
+    opacity: 0;
+    animation: fadeUp 0.7s var(--ease) 0.2s forwards;
+  }
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--f-mono);
+    font-size: 0.72rem;
+    color: var(--blue);
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    padding: 5px 12px;
+    border: 1px solid var(--blue-lt);
+    border-radius: 20px;
+    background: rgba(78,190,229,0.06);
+  }
+  .hero-tag::before {
+    content: '';
+    display: inline-block;
+    width: 7px; height: 7px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: pulse 2.2s ease-in-out infinite;
+  }
+  .hero-title {
+    font-family: var(--f-display);
+    font-size: clamp(2rem, 4.5vw, 3.1rem);
+    line-height: 1.12;
+    color: var(--navy);
+    letter-spacing: -0.025em;
+    max-width: 720px;
+    margin-bottom: 10px;
+  }
+  .hero-title em {
+    font-style: italic;
+    color: var(--blue);
+  }
+  .hero-subtitle {
+    font-size: 1.05rem;
+    color: var(--muted);
+    max-width: 580px;
+    margin-bottom: 32px;
+    font-weight: 300;
+    line-height: 1.6;
+  }
+  .hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: center;
+  }
+  .meta-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.80rem;
+    font-weight: 500;
+    color: var(--slate);
+    padding: 5px 12px;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 20px;
+  }
+  .meta-pill svg { width: 13px; height: 13px; opacity: 0.6; }
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 22px;
+    background: var(--navy);
+    color: white;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    letter-spacing: 0.01em;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .btn-primary:hover { background: var(--blue); transform: translateY(-1px); }
+  .btn-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 22px;
+    background: transparent;
+    color: var(--navy);
+    border: 1.5px solid var(--navy);
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s, transform 0.15s;
+  }
+  .btn-outline:hover { background: var(--navy); color: white; transform: translateY(-1px); }
+
+  /* ── STAT BAND ───────────────────────────────────────── */
+  .stat-band {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 52px 0;
+    opacity: 0;
+    animation: fadeUp 0.7s var(--ease) 0.35s forwards;
+  }
+  .stat-cell {
+    background: var(--surface);
+    padding: 26px 22px;
+    position: relative;
+  }
+  .stat-cell::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: var(--blue);
+    opacity: 0;
+    transition: opacity 0.25s;
+  }
+  .stat-cell:hover::after { opacity: 1; }
+  .stat-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .stat-value {
+    font-family: var(--f-display);
+    font-size: 1.9rem;
+    color: var(--navy);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .stat-note {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 5px;
+    line-height: 1.4;
+  }
+
+  /* ── SECTION STRUCTURE ───────────────────────────────── */
+  section {
+    margin-bottom: 60px;
+    opacity: 0;
+    animation: fadeUp 0.7s var(--ease) forwards;
+  }
+  section:nth-child(1)  { animation-delay: 0.40s; }
+  section:nth-child(2)  { animation-delay: 0.50s; }
+  section:nth-child(3)  { animation-delay: 0.55s; }
+  section:nth-child(4)  { animation-delay: 0.60s; }
+  section:nth-child(5)  { animation-delay: 0.65s; }
+  section:nth-child(6)  { animation-delay: 0.70s; }
+
+  .section-eyebrow {
+    font-family: var(--f-mono);
+    font-size: 0.70rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--blue);
+    margin-bottom: 10px;
+  }
+  .section-title {
+    font-family: var(--f-display);
+    font-size: 1.45rem;
+    color: var(--navy);
+    letter-spacing: -0.015em;
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1.5px solid var(--rule);
+  }
+
+  /* ── OVERVIEW TEXT ───────────────────────────────────── */
+  .overview-body {
+    font-size: 0.975rem;
+    color: var(--ink);
+    line-height: 1.75;
+    max-width: 780px;
+  }
+  .overview-body p + p { margin-top: 14px; }
+  .hl {
+    color: var(--navy);
+    font-weight: 600;
+  }
+
+  /* ── FINDINGS GRID ───────────────────────────────────── */
+  .findings-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+  .finding-card {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 20px 22px;
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .finding-card:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+    transform: translateY(-2px);
+  }
+  .finding-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 3px;
+    background: linear-gradient(90deg, var(--blue), var(--blue-lt));
+  }
+  .finding-num {
+    font-family: var(--f-mono);
+    font-size: 0.68rem;
+    color: var(--blue);
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    margin-bottom: 7px;
+  }
+  .finding-headline {
+    font-size: 0.90rem;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 6px;
+    line-height: 1.35;
+  }
+  .finding-body {
+    font-size: 0.83rem;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+  .finding-stat {
+    display: inline-block;
+    margin-top: 10px;
+    font-family: var(--f-mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--green);
+    background: rgba(8,202,169,0.08);
+    padding: 3px 10px;
+    border-radius: 12px;
+  }
+
+  /* ── METHODOLOGY ─────────────────────────────────────── */
+  .method-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    counter-reset: method;
+  }
+  .method-item {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 16px;
+    align-items: start;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .method-item:last-child { border-bottom: none; }
+  .method-num {
+    font-family: var(--f-display);
+    font-size: 1.5rem;
+    color: var(--steel);
+    line-height: 1;
+    padding-top: 2px;
+  }
+  .method-content {}
+  .method-title {
+    font-size: 0.90rem;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 4px;
+  }
+  .method-desc {
+    font-size: 0.83rem;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+
+  /* ── TECH STACK ──────────────────────────────────────── */
+  .stack-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  .stack-card {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 16px 18px;
+  }
+  .stack-category {
+    font-family: var(--f-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--blue);
+    margin-bottom: 8px;
+  }
+  .stack-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .stack-tag {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--ink);
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    padding: 3px 9px;
+    border-radius: 4px;
+  }
+
+  /* ── DELIVERABLES ────────────────────────────────────── */
+  .deliverables-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .deliverable-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 7px;
+  }
+  .deliverable-icon {
+    flex-shrink: 0;
+    width: 32px; height: 32px;
+    background: rgba(0,119,179,0.08);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--blue);
+    font-family: var(--f-mono);
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+  .deliverable-text {}
+  .deliverable-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 2px;
+  }
+  .deliverable-desc {
+    font-size: 0.78rem;
+    color: var(--muted);
+    line-height: 1.45;
+  }
+
+  /* ── MODEL PERFORMANCE STRIP ─────────────────────────── */
+  .model-strip {
+    background: var(--navy);
+    border-radius: 10px;
+    padding: 28px 32px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 24px;
+    align-items: center;
+    margin: 48px 0;
+  }
+  .model-strip-left {}
+  .model-strip-eyebrow {
+    font-family: var(--f-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--blue-lt);
+    margin-bottom: 7px;
+  }
+  .model-strip-title {
+    font-family: var(--f-display);
+    font-size: 1.2rem;
+    color: white;
+    margin-bottom: 6px;
+  }
+  .model-strip-body {
+    font-size: 0.83rem;
+    color: rgba(255,255,255,0.65);
+    line-height: 1.55;
+    max-width: 520px;
+  }
+  .model-metrics {
+    display: flex;
+    gap: 28px;
+    flex-shrink: 0;
+  }
+  .model-metric {
+    text-align: center;
+  }
+  .model-metric-value {
+    font-family: var(--f-display);
+    font-size: 1.8rem;
+    color: var(--green);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .model-metric-label {
+    font-size: 0.70rem;
+    font-weight: 500;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  /* ── FOOTER ──────────────────────────────────────────── */
+  footer {
+    border-top: 1px solid var(--rule);
+    padding: 32px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .footer-left {
+    font-family: var(--f-display);
+    font-size: 0.92rem;
+    color: var(--navy);
+  }
+  .footer-left span {
+    display: block;
+    font-family: var(--f-body);
+    font-size: 0.78rem;
+    color: var(--muted);
+    font-weight: 400;
+    margin-top: 3px;
+  }
+  .footer-links { display: flex; gap: 16px; }
+  .footer-links a {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--blue); }
+
+  /* ── ANIMATIONS ──────────────────────────────────────── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  /* ── RESPONSIVE ──────────────────────────────────────── */
+  @media (max-width: 720px) {
+    .page-wrap { padding: 0 20px 64px; }
+    nav { padding: 18px 20px; }
+    .nav-links { display: none; }
+    .stat-band { grid-template-columns: repeat(2, 1fr); }
+    .findings-grid { grid-template-columns: 1fr; }
+    .stack-grid { grid-template-columns: 1fr; }
+    .deliverables-list { grid-template-columns: 1fr; }
+    .model-strip { grid-template-columns: 1fr; }
+    .model-metrics { justify-content: flex-start; }
+    .hero-title { font-size: 1.9rem; }
+    footer { flex-direction: column; gap: 16px; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-name">Luciano Casillas</div>
+  <div class="nav-links">
+    <a href="#">Portfolio</a>
+    <a href="#">About</a>
+    <a href="#">Contact</a>
+  </div>
+</nav>
+
+<div class="page-wrap">
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="hero-tag">Insurance Analytics &nbsp;/&nbsp; Agency Operations</div>
+    <h1 class="hero-title">Multiproduct Household <em>Cross-Sell</em><br>Propensity and Revenue Expansion</h1>
+    <p class="hero-subtitle">
+      A senior-level analytics project built for Progressive Insurance Agency Operations,
+      identifying which single-product households are most likely to add a second product
+      and quantifying the $280M revenue opportunity.
+    </p>
+    <div class="hero-meta">
+      <a href="#" class="btn-primary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        Live Dashboard
+      </a>
+      <a href="#" class="btn-outline">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+        GitHub
+      </a>
+      <div class="meta-pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        2023 – 2024
+      </div>
+      <div class="meta-pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        Data Analyst III · Senior
+      </div>
+    </div>
+  </header>
+
+  <!-- STAT BAND -->
+  <div class="stat-band">
+    <div class="stat-cell">
+      <div class="stat-label">Households Analyzed</div>
+      <div class="stat-value">150K</div>
+      <div class="stat-note">Synthetic dataset, seed=42, fully reproducible</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-label">Unconverted CLTV Opportunity</div>
+      <div class="stat-value">$280M</div>
+      <div class="stat-note">110,908 unconverted households at avg $2,569 CLTV</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-label">Quote Abandonment Lift</div>
+      <div class="stat-value">1.5×</div>
+      <div class="stat-note">38.3% CVR for quote starters vs. 26.1% baseline</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-label">Robinson Strategy Gap</div>
+      <div class="stat-value">6 / 8</div>
+      <div class="stat-note">Quarters below target — widening since 2024 Q2</div>
+    </div>
+  </div>
+
+  <!-- OVERVIEW -->
+  <section>
+    <div class="section-eyebrow">Overview</div>
+    <h2 class="section-title">Project Summary</h2>
+    <div class="overview-body">
+      <p>
+        Progressive Insurance's Robinson Strategy targets growth in
+        <span class="hl">Multiproduct Households (MPHH)</span> — customers who hold two or more
+        Progressive products. MPHH customers retain at significantly higher rates and generate
+        40–60% more lifetime premium than single-product customers. This project answers the
+        central operational question: <em>which households should receive cross-sell outreach,
+        in what order, and what is it worth to get it right?</em>
+      </p>
+      <p>
+        Starting from 150,000 synthetic agency households snapshotted over two years, I built a
+        complete analytics pipeline — from data generation and SQL segmentation through propensity
+        modeling and financial impact simulation — and delivered two production-ready Streamlit
+        dashboards: a <span class="hl">cross-sell propensity explorer</span> for campaign teams
+        and a <span class="hl">benchmarking tracker</span> for Robinson Strategy executive
+        reporting. Every number in the project traces back to a verified computation.
+      </p>
+      <p>
+        The analysis surfaces that <span class="hl">property quote abandonment</span> is the
+        single highest-ROI intervention target, that the optimal outreach window is 1–3 contacts
+        per household per year, and that the portfolio has been behind its Robinson growth target
+        in 6 of the last 8 quarters — with the gap widening. These findings are directly
+        actionable by sales leadership, agency operations managers, and BI/control partners.
+      </p>
+    </div>
+  </section>
+
+  <!-- KEY FINDINGS -->
+  <section>
+    <div class="section-eyebrow">Analysis</div>
+    <h2 class="section-title">Key Findings</h2>
+    <div class="findings-grid">
+
+      <div class="finding-card">
+        <div class="finding-num">Finding 01</div>
+        <div class="finding-headline">Quote abandonment is the highest-ROI intervention target</div>
+        <div class="finding-body">Households that started a property quote but did not complete it convert at 38.3% — nearly 1.5x the 26.1% baseline. The 25,922 abandoned quotes in the dataset represent the single most recoverable population for any outreach campaign.</div>
+        <span class="finding-stat">1.5× baseline conversion rate</span>
+      </div>
+
+      <div class="finding-card">
+        <div class="finding-num">Finding 02</div>
+        <div class="finding-headline">Independent Agent channel leads at 29.7% MPHH rate</div>
+        <div class="finding-body">The Independent Agent channel converts 8 percentage points above Direct Online (21.8%), confirming that relationship-driven selling is the dominant cross-sell mechanism. Channel mix has a larger impact on MPHH rate than any single demographic attribute.</div>
+        <span class="finding-stat">+7.9pp vs. Direct Online</span>
+      </div>
+
+      <div class="finding-card">
+        <div class="finding-num">Finding 03</div>
+        <div class="finding-headline">Outreach sweet spot is 1–3 contacts per year</div>
+        <div class="finding-body">Conversion rate climbs from the zero-contact baseline through three contacts, then plateaus or reverses. Households receiving 4+ contacts show no incremental gain — representing wasted outreach budget that could be reallocated to untouched high-propensity households.</div>
+        <span class="finding-stat">Peak conversion: 2–3 contact band</span>
+      </div>
+
+      <div class="finding-card">
+        <div class="finding-num">Finding 04</div>
+        <div class="finding-headline">Robinson Strategy is behind target in 6 of 8 quarters</div>
+        <div class="finding-body">The portfolio has trended below the Robinson growth target since 2023 Q3, with the gap reaching –2.85pp by 2024 Q4. Q1–Q2 showed year-over-year improvement; Q3–Q4 reversed — pointing to a mid-year outreach program slowdown as the likely driver.</div>
+        <span class="finding-stat">–2.85pp gap in 2024 Q4</span>
+      </div>
+
+      <div class="finding-card">
+        <div class="finding-num">Finding 05</div>
+        <div class="finding-headline">24–60 month tenure cohort is the conversion sweet spot</div>
+        <div class="finding-body">Established customers in the 24–60 month tenure window convert at the highest rates across all acquisition cohorts. Very new households (under 6 months) convert poorly; the 60+ month cohort shows slight decline, suggesting long-tenure habituation to single-product status.</div>
+        <span class="finding-stat">Peak: 24–35 month tenure bucket</span>
+      </div>
+
+      <div class="finding-card">
+        <div class="finding-num">Finding 06</div>
+        <div class="finding-headline">Elite + Independent Agent households convert at 38%+</div>
+        <div class="finding-body">The highest-value cross-sell segment — Elite tier homeowners acquired through Independent Agents — converts at over 38% with an average projected CLTV above $1,800. At approximately 8,400 unconverted households, this segment represents a concentrated, high-return intervention target.</div>
+        <span class="finding-stat">Avg CLTV $1,840 per household</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- MODEL STRIP -->
+  <div class="model-strip">
+    <div class="model-strip-left">
+      <div class="model-strip-eyebrow">Gradient Boosting Classifier · scikit-learn</div>
+      <div class="model-strip-title">Propensity Model Performance</div>
+      <div class="model-strip-body">
+        Trained on 8 behavioral and demographic features with stratified 80/20 holdout.
+        Leakage-prone columns (propensity score, projected CLTV) explicitly excluded.
+        Top decile households convert at 2.05× the baseline — enabling a campaign targeting
+        20% of the population to reach 36% of all actual converters.
+      </div>
+    </div>
+    <div class="model-metrics">
+      <div class="model-metric">
+        <div class="model-metric-value">0.69</div>
+        <div class="model-metric-label">AUC-ROC</div>
+      </div>
+      <div class="model-metric">
+        <div class="model-metric-value">2.05×</div>
+        <div class="model-metric-label">Top Decile Lift</div>
+      </div>
+      <div class="model-metric">
+        <div class="model-metric-value">36%</div>
+        <div class="model-metric-label">Top-2 Decile Gain</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- METHODOLOGY -->
+  <section>
+    <div class="section-eyebrow">Approach</div>
+    <h2 class="section-title">Methodology</h2>
+    <div class="method-list">
+      <div class="method-item">
+        <div class="method-num">01</div>
+        <div class="method-content">
+          <div class="method-title">Synthetic Dataset Design</div>
+          <div class="method-desc">Generated 150,000 households using a logistic function with domain-calibrated coefficients to produce realistic conversion patterns — not random noise. Property quote initiation and outreach contact frequency were explicitly wired as the two strongest behavioral signals, matching known P&amp;C insurance cross-sell dynamics. Seed=42, fully reproducible.</div>
+        </div>
+      </div>
+      <div class="method-item">
+        <div class="method-num">02</div>
+        <div class="method-content">
+          <div class="method-title">SQL Analysis (12 Queries, 5 Sections)</div>
+          <div class="method-desc">Wrote ANSI SQL (PostgreSQL / Snowflake compatible) covering data quality validation, segmentation analysis, financial impact quantification, cohort and behavioral analysis, and model support queries. All queries use CTEs and window functions. The final query produces the intervention candidate list used by the dashboard's At-Risk Explorer.</div>
+        </div>
+      </div>
+      <div class="method-item">
+        <div class="method-num">03</div>
+        <div class="method-content">
+          <div class="method-title">Propensity Modeling with Leakage Controls</div>
+          <div class="method-desc">Trained a Gradient Boosting classifier on 8 features. Propensity score, propensity tier, and projected CLTV were explicitly excluded from the feature set and documented in the data dictionary as leakage-prone. In production, the propensity score is the model output — not an input. Evaluated using AUC-ROC, lift by decile, and cumulative gain curves.</div>
+        </div>
+      </div>
+      <div class="method-item">
+        <div class="method-num">04</div>
+        <div class="method-content">
+          <div class="method-title">Financial Impact Framework</div>
+          <div class="method-desc">CLTV = (anchor premium + estimated property premium) × projected tenure years × 18% margin factor. The revenue simulator models campaign ROI across save rate scenarios (5%–40%) and cost-per-contact inputs ($10–$150). At 15% save rate and $35 per contact, the program generates an 11× ROI against the full unconverted population.</div>
+        </div>
+      </div>
+      <div class="method-item">
+        <div class="method-num">05</div>
+        <div class="method-content">
+          <div class="method-title">Dual Streamlit Dashboards</div>
+          <div class="method-desc">Delivered two single-file Streamlit applications sharing the same dataset and color system. The propensity dashboard (6 tabs) covers exploration, drivers, model risk, financial impact, cross-industry translation, and recommendations. The benchmarking dashboard (6 tabs) covers the Robinson Strategy tracker, YoY growth, cohort retention heatmaps, agent leaderboards, state performance, and pipeline health.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DELIVERABLES -->
+  <section>
+    <div class="section-eyebrow">Outputs</div>
+    <h2 class="section-title">Project Deliverables</h2>
+    <div class="deliverables-list">
+      <div class="deliverable-item">
+        <div class="deliverable-icon">CSV</div>
+        <div class="deliverable-text">
+          <div class="deliverable-name">Synthetic Dataset</div>
+          <div class="deliverable-desc">150,000-row household dataset with 20 columns, data dictionary, and metadata JSON. Fully documented leakage controls.</div>
+        </div>
+      </div>
+      <div class="deliverable-item">
+        <div class="deliverable-icon">SQL</div>
+        <div class="deliverable-text">
+          <div class="deliverable-name">SQL Analysis File</div>
+          <div class="deliverable-desc">12 queries across 5 sections. ANSI SQL, CTE-based, Snowflake-ready. Includes intervention candidate query feeding the dashboard.</div>
+        </div>
+      </div>
+      <div class="deliverable-item">
+        <div class="deliverable-icon">APP</div>
+        <div class="deliverable-text">
+          <div class="deliverable-name">Cross-Sell Propensity Dashboard</div>
+          <div class="deliverable-desc">6-tab Streamlit app with live GBM model inference, financial simulator, at-risk explorer, and healthcare cross-industry translation.</div>
+        </div>
+      </div>
+      <div class="deliverable-item">
+        <div class="deliverable-icon">APP</div>
+        <div class="deliverable-text">
+          <div class="deliverable-name">MPHH Benchmarking Dashboard</div>
+          <div class="deliverable-desc">6-tab Robinson Strategy reporting tracker: quarterly targets, YoY growth, cohort heatmaps, 711-agent leaderboard, state performance.</div>
+        </div>
+      </div>
+      <div class="deliverable-item">
+        <div class="deliverable-icon">PY</div>
+        <div class="deliverable-text">
+          <div class="deliverable-name">Data Generation Script</div>
+          <div class="deliverable-desc">Standalone Python script with config block, section comments, and metadata JSON export. Reproducible with seed=42.</div>
+        </div>
+      </div>
+      <div class="deliverable-item">
+        <div class="deliverable-icon">DOC</div>
+        <div class="deliverable-text">
+          <div class="deliverable-name">Interview Preparation Guide</div>
+          <div class="deliverable-desc">Elevator pitch, 8 technical deep-dives, 5 behavioral STAR answers, 8 technical Q&amp;As, 5 smart interviewer questions, and a full glossary.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TECH STACK -->
+  <section>
+    <div class="section-eyebrow">Technical</div>
+    <h2 class="section-title">Stack and Tools</h2>
+    <div class="stack-grid">
+      <div class="stack-card">
+        <div class="stack-category">Data &amp; Modeling</div>
+        <div class="stack-items">
+          <span class="stack-tag">Python 3.11</span>
+          <span class="stack-tag">pandas</span>
+          <span class="stack-tag">numpy</span>
+          <span class="stack-tag">scikit-learn</span>
+          <span class="stack-tag">GradientBoosting</span>
+        </div>
+      </div>
+      <div class="stack-card">
+        <div class="stack-category">SQL / Warehouse</div>
+        <div class="stack-items">
+          <span class="stack-tag">ANSI SQL</span>
+          <span class="stack-tag">Snowflake</span>
+          <span class="stack-tag">PostgreSQL</span>
+          <span class="stack-tag">CTEs</span>
+          <span class="stack-tag">Window Functions</span>
+        </div>
+      </div>
+      <div class="stack-card">
+        <div class="stack-category">Dashboard</div>
+        <div class="stack-items">
+          <span class="stack-tag">Streamlit</span>
+          <span class="stack-tag">Plotly</span>
+          <span class="stack-tag">HTML/CSS</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-left">
+      Luciano Casillas
+      <span>Data Analytics Portfolio · 2024</span>
+    </div>
+    <div class="footer-links">
+      <a href="#">GitHub</a>
+      <a href="#">LinkedIn</a>
+      <a href="#">Resume</a>
+    </div>
+  </footer>
+
+</div><!-- /page-wrap -->
+</body>
+</html>
