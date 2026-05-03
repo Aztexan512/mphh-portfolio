@@ -160,7 +160,7 @@ streamlit run benchmarking_app.py
 | Dashboard | Link |
 |---|---|
 | MPHH Cross-Sell Propensity Explorer | [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://qf7zyjwemc2duqnbkhbhgh.streamlit.app/) |
-| MPHH Benchmarking & Reporting Tracker | [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://benchmarkingapppy-vjccagmtcwt2fdtbrzrjtx.streamlit.app/) |
+| Robertson Strategy Performance Dashboard (MPHH Benchmarking & Reporting Tracker) | [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://benchmarkingapppy-vjccagmtcwt2fdtbrzrjtx.streamlit.app/) |
 
 ---
 
