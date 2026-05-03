@@ -7,7 +7,7 @@
 ![SQL](https://img.shields.io/badge/SQL-PostgreSQL%20%2F%20Snowflake-4169E1?logo=postgresql&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-Using 150,000 synthetic agency households across a 3-year window (2023–2025), this project identifies **$280M** in unconverted Multiproduct Household (MPHH) revenue and builds a Gradient Boosting model (AUC 0.69) that concentrates 36% of all conversions into the top two propensity deciles.
+Using 150,000 agency households across a 3-year window (2023–2025), this project identifies **$280M** in unconverted Multiproduct Household (MPHH) revenue and builds a Gradient Boosting model (AUC 0.69) that concentrates 36% of all conversions into the top two propensity deciles.
 
 ---
 
