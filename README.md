@@ -1,4 +1,4 @@
-# 🏠 MPHH Cross-Sell Propensity and Revenue Expansion
+# 🏠 Multiproduct Household (MPHH) Cross-Sell Propensity and Revenue Expansion
 
 ![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.35+-FF4B4B?logo=streamlit&logoColor=white)
