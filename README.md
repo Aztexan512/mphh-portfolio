@@ -54,28 +54,24 @@ The central business question is which single-product households should receive 
 Households that initiated a property quote but did not complete it convert at **2.4x the baseline rate**, making this behavioral signal the single most predictive feature in the model. This population of approximately 28,000 households represents the clearest self-identified demand signal in the book.
 
 <!-- SCREENSHOT REQUIRED: Cross-Sell Drivers tab -- quote abandonment chart showing conversion rate lift -->
-![Quote Abandonment Conversion Lift](screenshots/cross_sell_drivers.png)
 
 ### 2. Independent Agent Channel Outperforms All Others
 
 The Independent Agent channel converts at **~31%**, 6–8 percentage points above the portfolio average, reflecting the trust and consultation dynamic inherent in agent-led relationships. Captive Agent follows, while Direct Online trails significantly, highlighting channel as a critical stratification variable for campaign targeting.
 
 <!-- SCREENSHOT REQUIRED: Overview tab -- channel conversion rate breakdown chart -->
-![Channel Conversion Rate](screenshots/overview.png)
 
 ### 3. Propensity Model Concentrates Conversions into Top Deciles
 
 The Gradient Boosting model achieves **AUC 0.69** on holdout data, with the top two propensity deciles capturing **36% of all conversions** and delivering a 2.05x lift over random targeting. The lift chart confirms the model's ability to rank-order households by conversion likelihood, enabling precise, low-waste outreach.
 
 <!-- SCREENSHOT REQUIRED: Model + Risk tab -- propensity decile lift chart and score distribution -->
-![Model Lift Chart](screenshots/model_risk.png)
 
 ### 4. Financial Simulator Quantifies Campaign ROI
 
 The financial impact tab allows campaign planners to model outreach scenarios against the **$280M** unconverted CLTV opportunity. At a conservative 10% save rate on targeted households, a campaign focused on the top two deciles generates an estimated **$28M** in net CLTV, well above any realistic contact cost.
 
 <!-- SCREENSHOT REQUIRED: Financial Impact tab -- CLTV simulator with results card and scenario bar chart -->
-![Financial Impact Simulator](screenshots/financial_impact.png)
 
 ---
 
