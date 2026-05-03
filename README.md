@@ -218,6 +218,7 @@ Luciano Casillas
 Independent Analytics Consultant | Austin, TX
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue)](https://linkedin.com/in/luciano-casillas)
-[![GitHub](https://img.shields.io/badge/GitHub-Aztexan512-lightgrey)](https://github.com/Aztexan512)
+[![GitHub](https://img.shields.io/badge/GitHub-Aztexan512-lightgrey)](https://Aztexan512.github.io)
+
 
 luciano.casillasjr@outlook.com
