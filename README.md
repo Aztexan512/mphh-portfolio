@@ -1,4 +1,4 @@
-# MPHH Cross-Sell Propensity and Revenue Expansion
+# 🏠 MPHH Cross-Sell Propensity and Revenue Expansion
 
 ![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.35+-FF4B4B?logo=streamlit&logoColor=white)
@@ -7,161 +7,221 @@
 ![SQL](https://img.shields.io/badge/SQL-PostgreSQL%20%2F%20Snowflake-4169E1?logo=postgresql&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
----
-
-## Live Dashboards
-
-| Dashboard | Description |
-|---|---|
-| [MPHH Cross-Sell Propensity](https://qf7zyjwemc2duqnbkhbhgh.streamlit.app/) | Campaign targeting: which households to outreach, why, and what it's worth |
-| [MPHH Benchmarking & Reporting](https://benchmarkingapppy-vjccagmtcwt2fdtbrzrjtx.streamlit.app/) | Executive reporting: Robertson Strategy tracker, agent leaderboard, YoY growth |
-
-> Replace placeholder URLs with your deployed Streamlit Community Cloud links.
+Using 150,000 synthetic agency households across a 3-year window (2023–2025), this project identifies **$280M** in unconverted Multiproduct Household (MPHH) revenue and builds a Gradient Boosting model (AUC 0.69) that concentrates 36% of all conversions into the top two propensity deciles.
 
 ---
 
-## Project Summary
+## 📋 Table of Contents
 
-This project analyzes which single-product AutoShield Insurance households are most likely to add a second product (becoming a Multiproduct Household, or MPHH) within 12 months. Using 150,000 synthetic agency households across a 3-year window (2023–2025), the analysis identifies that **property quote abandonment** and **proactive outreach contact frequency** are the two strongest behavioral signals for cross-sell conversion.
-
-A Gradient Boosting model achieves AUC 0.69 on holdout data, with the top two propensity deciles capturing 36% of all conversions — enabling highly targeted, low-waste outreach campaigns. The projected unconverted CLTV opportunity across the full dataset exceeds **$280M**.
-
----
-
-## Business Problem
-
-**Question:** Which of AutoShield's single-product households should receive cross-sell outreach, and in what priority order, to maximize Multiproduct Household growth and CLTV?
-
-**Stakeholders:** Agency Operations leadership, Sales Strategy team, BI/Control partners, Product teams driving the Robertson Strategy.
-
-**Robertson Strategy:** The Robertson Strategy targets a specific high-value customer demographic known internally as the Robertsons. These are long-tenured households who have been with AutoShield Insurance for several years, hold multiple product policies across vehicles, motorcycle, boat, and home, are more likely to be married, pay their premiums reliably either in a single annual payment or through auto-pay, and demonstrate strong brand loyalty over time. The strategy is focused on deepening engagement with this demographic by expanding their product portfolio and ensuring they remain within the AutoShield household.
-
-**Why it matters:** Multiproduct Households retain at significantly higher rates and generate 40–60% more lifetime premium than single-product customers. Each household that adds a property product represents not just incremental premium but a structural improvement in retention — making MPHH growth a top strategic priority.
+- [Project Background](#-project-background)
+- [Executive Summary](#-executive-summary)
+- [Insights Deep Dive](#-insights-deep-dive)
+- [Recommendations](#-recommendations)
+- [Data Structure](#️-data-structure)
+- [Setup](#️-setup)
+- [Live Dashboards](#-live-dashboards)
+- [File Structure](#-file-structure)
+- [Assumptions and Caveats](#️-assumptions-and-caveats)
+- [Author](#-author)
 
 ---
 
-## Key Findings
+## 🏢 Project Background
 
-1. **Property quote abandonment is the single strongest conversion signal.** Households that started a property quote but did not complete it convert at 2.4x the baseline rate. This population (~28,000 households) represents the highest-ROI intervention target.
+AutoShield Insurance is a mid-size personal lines carrier operating across 10 states through four distribution channels: Independent Agent, Direct Online, Captive Agent, and Employer Sponsored. Despite strong retention among long-tenured customers, a large share of AutoShield's book remains single-product households, representing a significant untapped revenue opportunity.
 
-2. **Independent Agent channel drives the highest conversion rate at ~31%.** Despite lower volume than Direct Online, Independent Agent households convert 6–8 percentage points above the overall average, reflecting the relationship-selling advantage of the agent channel.
+The Robertson Strategy is AutoShield's internal initiative to deepen engagement with its highest-value customer demographic: long-tenured households holding multiple product policies across auto, motorcycle, boat, and home. These customers pay reliably, demonstrate strong brand loyalty, and are the most likely candidates to expand their policy portfolio. The strategy targets converting single-product households in this demographic into Multiproduct Households (MPHH) through structured outreach campaigns.
 
-3. **Outreach contact sweet spot is 1–3 contacts in 12 months.** Conversion rate climbs sharply from 0 contacts to 2–3 contacts, then flattens or declines above 4. This directly informs campaign contact cap design.
-
-4. **Elite and Plus tier homeowners are the highest-value cross-sell segment.** Independent Agent / Elite / Auto households convert at over 38% with an average projected CLTV above $1,800 — 1.5x the portfolio average.
-
-5. **The 24–60 month tenure cohort is the volume-and-conversion sweet spot.** Established customers who have been with AutoShield 2–5 years have the trust and engagement profile most receptive to cross-sell.
-
-6. **Top 20% of model-scored households capture 36% of all conversions.** A campaign targeting only the top two propensity deciles achieves 2.05x the conversion rate of untargeted outreach, at a fraction of the contact cost.
-
-7. **Total unconverted MPHH CLTV opportunity exceeds $280M.** Even at a conservative 10% save rate, a targeted outreach program generates an estimated $28M in net CLTV — well above any realistic campaign cost.
+The central business question is which single-product households should receive cross-sell outreach, and in what priority order, to maximize MPHH growth and customer lifetime value. Multiproduct Households retain at significantly higher rates and generate 40–60% more lifetime premium than single-product customers. Each household that adds a property product represents not just incremental premium but a structural improvement in retention, making MPHH growth a top strategic priority for AutoShield leadership.
 
 ---
 
-## Dashboards
+## 📊 Executive Summary
 
-### `app.py` — MPHH Cross-Sell Propensity Dashboard
-Six tabs designed for campaign teams and analysts:
-- **Overview** — conversion rate summary, segment breakdown
-- **Cross-Sell Drivers** — outreach contact impact, quote abandonment analysis, behavioral signals
-- **Model + Risk** — propensity decile lift chart, score distribution, intervention candidates
-- **Financial Impact** — CLTV opportunity by segment, revenue simulator
-- **Healthcare Application** — framework portability demonstration
-- **Recommendations** — prioritized action items with supporting evidence
-
-### `benchmarking_app.py` — MPHH Benchmarking & Reporting Dashboard
-Six tabs designed for executive and operations reporting:
-- **Robertson Strategy Tracker** — quarterly MPHH rate vs. target (12 quarters, 2023–2025)
-- **YoY Growth** — year-over-year rate and delta charts across all 3 years
-- **Cohort Retention** — acquisition cohort comparison (2023 Early / 2024 Mid / 2025 Recent)
-- **Agent Leaderboard** — ranked agent performance across 450 agents and 4 channels
-- **State Performance** — conversion rate and CLTV heatmap across 10 states
-- **Pipeline Health** — propensity tier funnel, outreach gap, intervention queue
+- Property quote abandonment is the single strongest conversion signal. Households that started a property quote but did not complete it convert at **2.4x the baseline rate**, representing the highest-ROI intervention target across the portfolio.
+- The Independent Agent channel drives the highest conversion rate at **~31%**, outperforming the overall average by 6–8 percentage points and reflecting the relationship-selling advantage of the agent channel.
+- Outreach contact frequency peaks at 1–3 contacts per 12-month window. Conversion rate climbs sharply from 0 to 2–3 contacts, then flattens or declines above 4, directly informing campaign contact cap design.
+- Elite and Plus tier homeowners are the highest-value cross-sell segment, with Independent Agent / Elite / Auto households converting at **over 38%** and an average projected CLTV above **$1,800**, approximately 1.5x the portfolio average.
+- The 24–60 month tenure cohort is the volume-and-conversion sweet spot. Established customers 2–5 years into their relationship with AutoShield have the trust and engagement profile most receptive to cross-sell.
+- The top 20% of model-scored households capture **36% of all conversions**, achieving 2.05x the conversion rate of untargeted outreach at a fraction of the contact cost. Total unconverted MPHH CLTV opportunity exceeds **$280M**.
 
 ---
 
-## Tech Stack
+## 🔍 Insights Deep Dive
 
-| Component | Technology |
-|---|---|
-| Language | Python 3.11 |
-| Data Generation | NumPy, Pandas |
-| Machine Learning | scikit-learn (GradientBoostingClassifier) |
-| Visualization | Plotly |
-| Dashboard | Streamlit 1.35+ |
-| SQL Dialect | ANSI SQL (PostgreSQL / Snowflake compatible) |
-| Version Control | Git / GitHub |
+### 1. Property Quote Abandonment Drives Highest Conversion Lift
 
----
+Households that initiated a property quote but did not complete it convert at **2.4x the baseline rate**, making this behavioral signal the single most predictive feature in the model. This population of approximately 28,000 households represents the clearest self-identified demand signal in the book.
 
-## File Structure
+<!-- SCREENSHOT REQUIRED: Cross-Sell Drivers tab -- quote abandonment chart showing conversion rate lift -->
+![Quote Abandonment Conversion Lift](screenshots/cross_sell_drivers.png)
 
-```
-mphh_portfolio/
-  app.py                              # Cross-sell propensity dashboard
-  benchmarking_app.py                 # Benchmarking & reporting dashboard
-  requirements.txt                    # Python dependencies
-  .streamlit/
-    config.toml                       # Streamlit theme configuration
-  data/
-    mphh_crosssell.csv                # 150,000-row synthetic dataset (2023–2025)
-    mphh_crosssell_metadata.json      # Dataset metadata and generation params
-    mphh_benchmarking.csv             # Benchmarking dataset (adds agent_id, region, quarter)
-    data_dictionary.md                # Column reference with leakage notes
-  scripts/
-    01_generate_data.py               # Generates mphh_crosssell.csv
-    02_generate_benchmarking_data.py  # Generates mphh_benchmarking.csv
-  sql/
-    mphh_crosssell_analysis.sql       # 12 queries: EDA, segmentation, model support
-    mphh_benchmarking_analysis.sql    # 19 queries: Robinson tracker, agent, YoY, cohort
-  docs/
-    PROJECT_OVERVIEW.md               # Full project narrative
-    INTERVIEW_PREP.md                 # Interview preparation guide
-```
+### 2. Independent Agent Channel Outperforms All Others
+
+The Independent Agent channel converts at **~31%**, 6–8 percentage points above the portfolio average, reflecting the trust and consultation dynamic inherent in agent-led relationships. Captive Agent follows, while Direct Online trails significantly, highlighting channel as a critical stratification variable for campaign targeting.
+
+<!-- SCREENSHOT REQUIRED: Overview tab -- channel conversion rate breakdown chart -->
+![Channel Conversion Rate](screenshots/overview.png)
+
+### 3. Propensity Model Concentrates Conversions into Top Deciles
+
+The Gradient Boosting model achieves **AUC 0.69** on holdout data, with the top two propensity deciles capturing **36% of all conversions** and delivering a 2.05x lift over random targeting. The lift chart confirms the model's ability to rank-order households by conversion likelihood, enabling precise, low-waste outreach.
+
+<!-- SCREENSHOT REQUIRED: Model + Risk tab -- propensity decile lift chart and score distribution -->
+![Model Lift Chart](screenshots/model_risk.png)
+
+### 4. Financial Simulator Quantifies Campaign ROI
+
+The financial impact tab allows campaign planners to model outreach scenarios against the **$280M** unconverted CLTV opportunity. At a conservative 10% save rate on targeted households, a campaign focused on the top two deciles generates an estimated **$28M** in net CLTV, well above any realistic contact cost.
+
+<!-- SCREENSHOT REQUIRED: Financial Impact tab -- CLTV simulator with results card and scenario bar chart -->
+![Financial Impact Simulator](screenshots/financial_impact.png)
 
 ---
 
-## Setup Instructions
+## 💡 Recommendations
+
+### Immediate Actions (0–30 Days)
+
+**Launch a Quote Abandonment Re-Engagement Campaign**
+Approximately 28,000 households with incomplete property quotes convert at 2.4x the baseline rate. A targeted outreach sequence for this segment requires no model scoring and can begin immediately.
+
+**Apply a 3-Contact Cap to All Outreach Campaigns**
+Conversion rate peaks at 2–3 contacts and flattens or declines above 4. Implementing a contact cap reduces wasted outreach and improves the household experience at negligible cost.
+
+### Short-Term Actions (30–90 Days)
+
+**Deploy the Propensity Model to Rank the Full Single-Product Book**
+The top two propensity deciles capture 36% of all conversions at 2.05x the untargeted rate. Routing campaign lists through the model score before each outreach cycle maximizes conversion per dollar spent.
+
+**Prioritize Elite and Plus Tier Independent Agent Households**
+This sub-segment converts at over 38% with an average CLTV above $1,800. Dedicating Independent Agent capacity to this cohort generates the highest per-contact revenue return in the book.
+
+### Strategic Investments (90+ Days)
+
+**Build a Robertson Strategy Performance Dashboard for Executive Reporting**
+The Robertson Strategy is currently behind target in 6 of 8 tracked quarters. A structured reporting cadence with quarterly MPHH rate vs. target, agent leaderboard, and YoY growth visibility enables leadership to diagnose underperformance and reallocate resources.
+
+**Develop a Tenure-Segmented Outreach Playbook for the 24–60 Month Cohort**
+The 2–5 year tenure cohort represents the volume-and-conversion sweet spot across the book. A dedicated playbook with channel-specific messaging for this cohort, informed by behavioral signals and propensity scores, provides a scalable framework for MPHH growth beyond the immediate campaign cycle.
+
+---
+
+## 🗂️ Data Structure
+
+All data in this project is synthetic. The analysis-ready dataset (`data/mphh_crosssell.csv`) was generated from source tables that reflect how this data actually lives in a real insurance system.
+
+Dataset: 150,000 rows | Seed: 42 | Time window: January 2023 to December 2025
+
+| Column | Type | Description |
+|---|---|---|
+| household_id | string | Unique household identifier |
+| snapshot_date | date | Date of household snapshot |
+| tenure_months | integer | Months since first policy effective date |
+| channel | string | Distribution channel (Independent Agent, Direct Online, Captive Agent, Employer Sponsored) |
+| tier | string | Customer tier (Elite, Plus, Standard) |
+| primary_product | string | Current primary product (Auto, Motorcycle, Boat) |
+| outreach_contacts_12m | integer | Number of outreach contacts in prior 12 months |
+| quote_abandoned | boolean | Whether household started but did not complete a property quote |
+| propensity_score | float | Model-assigned conversion probability (0–1) |
+| projected_cltv | float | Estimated customer lifetime value if converted |
+| converted | boolean | Target variable: converted to MPHH within 12 months |
+
+Leakage-prone columns (excluded from model training):
+
+| Column | Risk | Reason |
+|---|---|---|
+| projected_cltv | HIGH | Computed from conversion outcome; including it would leak the target |
+| propensity_score | HIGH | Is the model output; cannot be used as a training feature |
+
+Source table schema: See [data/schema/erd.md](data/schema/erd.md) for the entity-relationship diagram and [data/schema/table_definitions.md](data/schema/table_definitions.md) for source table grain and join logic.
+
+---
+
+## ⚙️ Setup
 
 ```bash
-# 1. Clone the repository
-git clone https://github.com/your-username/mphh-portfolio.git
-cd mphh-portfolio
+# 1. Clone the repo
+git clone https://github.com/Aztexan512/Multiproduct-Household-Propensity-Model.git
+cd Multiproduct-Household-Propensity-Model
 
-# 2. Create and activate a virtual environment
-python -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
-
-# 3. Install dependencies
+# 2. Install dependencies
 pip install -r requirements.txt
 
-# 4. Generate the datasets (CSVs are included; run only if regenerating)
-python scripts/01_generate_data.py
-python scripts/02_generate_benchmarking_data.py
-
-# 5. Launch the dashboards (run in separate terminals)
+# 3. Run the primary dashboard
 streamlit run app.py
+
+# 4. Run the benchmarking dashboard (separate terminal)
 streamlit run benchmarking_app.py
 ```
 
-Both dashboards open at `http://localhost:8501` (second gets `http://localhost:8502`).
+> Note: The analysis-ready dataset is committed to this repo at `data/mphh_crosssell.csv`. No data generation step is required to run the dashboard or notebook.
 
 ---
 
-## Deploy to Streamlit Community Cloud
+## 🚀 Live Dashboards
 
-1. Push the repository to GitHub (ensure `data/*.csv` files are committed).
-2. Go to [share.streamlit.io](https://share.streamlit.io) and sign in with GitHub.
-3. Click **New app**, select your repository, branch `main`.
-4. For the propensity dashboard, set main file to `app.py`. Deploy again with `benchmarking_app.py` for the second dashboard.
-5. No secrets or environment variables required.
+| Dashboard | Link |
+|---|---|
+| MPHH Cross-Sell Propensity Explorer | [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://qf7zyjwemc2duqnbkhbhgh.streamlit.app/) |
+| MPHH Benchmarking & Reporting Tracker | [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://benchmarkingapppy-vjccagmtcwt2fdtbrzrjtx.streamlit.app/) |
 
 ---
 
-## Dataset
+## 📁 File Structure
 
-- **Source:** Synthetic (fully reproducible, seed=42)
-- **Rows:** 150,000 (one row per household at a snapshot date)
-- **Time Window:** January 2023 – December 2025
-- **Conversion Rate:** ~26.1%
-- **Full data dictionary:** `data/data_dictionary.md`
+```
+mphh_portfolio/
+|-- README.md                          # This file
+|-- app.py                             # Cross-sell propensity dashboard
+|-- benchmarking_app.py                # Benchmarking & reporting dashboard
+|-- requirements.txt                   # Python dependencies
+|-- portfolio_page.html                # Standalone shareable project page
+|-- .streamlit/
+|   |-- config.toml                    # Dashboard theme configuration
+|-- data/
+|   |-- mphh_crosssell.csv             # Analysis-ready dataset (150,000 rows)
+|   |-- mphh_crosssell_metadata.json   # Generation parameters and dataset summary
+|   |-- mphh_benchmarking.csv          # Benchmarking dataset (adds agent_id, region, quarter)
+|   |-- data_dictionary.md             # Column reference with leakage documentation
+|   |-- schema/
+|       |-- erd.md                     # Entity-relationship diagram (Mermaid)
+|       |-- table_definitions.md       # Source table grain and join logic
+|-- sql/
+|   |-- mphh_crosssell_analysis.sql    # 12 queries: EDA, segmentation, model support
+|   |-- mphh_benchmarking_analysis.sql # 19 queries: Robertson tracker, agent, YoY, cohort
+|-- docs/
+|   |-- PROJECT_OVERVIEW.md            # Methodology, key findings, how to run
+|-- screenshots/                       # Dashboard screenshots for this README
+```
+
+---
+
+## ⚠️ Assumptions and Caveats
+
+**Synthetic data:** All data in this project is synthetic. The dataset was generated using NumPy with seed 42 for reproducibility. It is designed to produce realistic analytical patterns but does not represent any real company, customer, or transaction.
+
+**Modeling assumptions:**
+- CLTV definition: annual premium multiplied by projected retention months, discounted at 8%
+- Leakage prevention: `projected_cltv` and `propensity_score` excluded from model training
+- Target variable: `converted` flag represents MPHH conversion within a 12-month forward window
+- Model algorithm: GradientBoostingClassifier (scikit-learn) with default hyperparameters tuned via cross-validation
+
+**Business assumptions:**
+- Outreach cost per contact: $150 default in financial simulator
+- Save rate baseline: 10% conservative estimate applied to top-decile opportunity sizing
+- MPHH conversion rate baseline: ~26.1%, computed across the full 150,000-row dataset
+- Channel performance: Independent Agent conversion advantage reflects relationship-selling dynamics, not volume
+
+---
+
+## 👤 Author
+
+Luciano Casillas
+
+Independent Analytics Consultant | Austin, TX
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue)](https://linkedin.com/in/luciano-casillas)
+[![GitHub](https://img.shields.io/badge/GitHub-Aztexan512-lightgrey)](https://github.com/Aztexan512)
+
+luciano.casillasjr@outlook.com
